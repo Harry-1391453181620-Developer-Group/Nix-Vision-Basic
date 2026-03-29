@@ -2,4 +2,4 @@ Things done:
 1. Created the project
 2. Learned <Basics off CNN from Gradient-Based Learning Applied to Document Recognition>
 3. Created model.py
-4. 
+4. Created git repo
