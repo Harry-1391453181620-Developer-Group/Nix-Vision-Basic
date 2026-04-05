@@ -1,0 +1,8 @@
+Things done:
+1.  Added FullyConnectedLayer in layers.py
+2.  Commited changes in 2026/4/3and 2026/4/4
+3.  Fully Connected Layer:
+        Foward: output = input_data @ weights + bias
+        Backward: 1. weights_gradient = input_data.T @ gradient_output
+                  2. bias_gradient = np.sum(gradient_output, axis=0)
+                  3. gradient_input = gradient_output @ weights.T

@@ -55,3 +55,53 @@ class ConvolutionLayer:
 
         self.kernel_data += self.kernel_velocity
         self.bias_data += self.bias_velocity
+
+class ReLULayer:
+    def __init__(self):
+        self.input_data: np.ndarray | None = None
+
+    def forward(self, input_data: np.ndarray) -> np.ndarray:
+        self.input_data = input_data
+        output = np.maximum(0, input_data)
+        return output
+    
+    def backward(self, gradient_output: np.ndarray) -> np.ndarray:
+        relu_gradient = (self.input_data > 0).astype(float)
+        gradient_input = gradient_output * relu_gradient
+        return gradient_input
+    
+class FullyConnectedLayer: 
+    def __init__(self, input_size: int, output_size: int):
+        self.input_size = input_size
+        self.output_size = output_size
+
+        self.weights = np.random.randn(input_size, output_size) * 0.1
+        self.bias = np.zeros((1, output_size))
+
+        self.input_data = None
+
+        self.weights_gradient = np.zeros_like(self.weights)
+        self.bias_gradient = np.zeros_like(self.bias)
+
+        self.weights_velocity = np.zeros_like(self.weights)
+        self.bias_velocity = np.zeros_like(self.bias)
+
+    def foward(self, input_data: np.ndarray) -> np.ndarray:
+        self.input_data = input_data
+        return input_data @ self.weights + self.bias
+
+    def backward(self, output_gradient: np.ndarray) -> np.ndarray:
+        # ∂E/∂W
+        self.weights_gradient = self.input_data.T @ output_gradient
+        # ∂E/∂b
+        self.bias_gradient = np.sum(output_gradient, axis=0, keepdims=True)
+        # ∂E/∂X
+        input_gradient = output_gradient @ self.weights.T
+        return input_gradient
+    
+    def momentum_update(self, learning_rate: float, momentum: float = 0.9):
+        self.weights_velocity = momentum * self.weights_velocity - learning_rate * self.weights_gradient
+        self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
+
+        self.weights += self.weights_velocity
+        self.bias += self.bias_velocity

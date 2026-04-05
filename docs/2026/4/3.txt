@@ -1,0 +1,13 @@
+Things done:
+1.  Created image_preprocess.py. It can convert 256*256 image into 256*256 np.ndarray.
+2.  Add the convolution layer class into layers.py, move the convolution foward method into this class.
+2.  Learned momentum decay method, and apply it to layers.py, replacing the SGD method. 
+    Momentum method function: current_velocity = momentum_factor * original_velocity - (learning_rate * gradient)
+                              current_argument = original_argument += velocity
+    SGD(Stochastic Gradient Descent): current_argument = original_argument - learning_rate * gradient
+3.  Add the ReLU layer class into layers.py. 
+    ReLU: Forward: f(x)= x (x>0)
+                         0 (x<=0)
+          Backward: f'(x) = 1 (x>0)
+                            0 (x<=0)
+        In short, ReLU is like set negative numbers into 0 and keep the positive numbers.
