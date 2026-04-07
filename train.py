@@ -28,6 +28,8 @@ def train(model, data, labels, epochs=10, lr=0.01):
             model.update(lr)
 
         print(f"Epoch {epoch}, Loss: {total_loss / len(data)}")
+        if epoch % 5 == 0 and i == 0:
+            print("Prediction:", prediction)
 
 if __name__ == "__main__":
     dataset_path = r"D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset"
@@ -36,7 +38,7 @@ if __name__ == "__main__":
 
     print("Classes:", class_names)
     print("Data shape:", data.shape)
-
+    
     model = MyAI(num_classes=len(class_names))
 
-    train(model, data, labels, epochs=5, lr=0.01)
+    train(model, data, labels, epochs=20, lr=0.001)

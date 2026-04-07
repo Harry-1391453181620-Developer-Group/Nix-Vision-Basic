@@ -1,12 +1,13 @@
 import numpy as np
 
 class ConvolutionLayer:
-    def __init__(self, kernel_x: int, kernel_y: int):
+    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int):
+        self.num_kernels = num_kernels
         self.kernel_x = kernel_x
         self.kernel_y = kernel_y
 
-        self.kernel_data = np.random.randn(kernel_x, kernel_y) * 0.1
-        self.bias_data = np.zeros((1,))
+        self.kernel_data = np.random.randn(num_kernels, kernel_x, kernel_y) * 0.1
+        self.bias_data = np.zeros((num_kernels,))
 
         self.kernel_gradient = np.zeros_like(self.kernel_data)
         self.bias_gradient = np.zeros_like(self.bias_data)
@@ -28,12 +29,12 @@ class ConvolutionLayer:
         output_x = input_x - self.kernel_x + 1
         output_y = input_y - self.kernel_y + 1
 
-        output = np.zeros((output_x, output_y))
-
-        for i in range(output_x):
-            for j in range(output_y):
-                region = self.input_cache[i:i+self.kernel_x, j:j+self.kernel_y]
-                output[i, j] = np.sum(region * self.kernel_data) + self.bias_data[0]
+        output = np.zeros((self.num_kernels, output_x, output_y))
+        for k in range(self.num_kernels):
+            for i in range(output_x):
+                for j in range(output_y):
+                    region = self.input_cache[i:i+self.kernel_x, j:j+self.kernel_y]
+                    output[k, i, j] = np.sum(region * self.kernel_data[k]) + self.bias_data[k]
         
         return output
     
@@ -43,24 +44,24 @@ class ConvolutionLayer:
             raise ValueError("Run forward before backward.")
         input_data = self.input_cache
 
-        output_x, output_y = output_gradient.shape
+        K, output_x, output_y = output_gradient.shape
 
         self.kernel_gradient.fill(0)
         self.bias_gradient.fill(0)
 
         input_gradient = np.zeros_like(input_data)
-
-        for i in range(output_x):
-            for j in range(output_y):
-                region = input_data[i:i+self.kernel_x, j:j+self.kernel_y]
-                self.kernel_gradient += region * output_gradient[i, j]
-                self.bias_gradient[0] += output_gradient[i, j]
-                input_gradient[i:i + self.kernel_x, j:j + self.kernel_y] += \
-                    self.kernel_data * output_gradient[i, j]
+    
+        for k in range(K):
+            for i in range(output_x):
+                for j in range(output_y):
+                    region = input_data[i:i+self.kernel_x, j:j+self.kernel_y]
+                    self.kernel_gradient[k] += region * output_gradient[k, i, j]
+                    self.bias_gradient[k] += output_gradient[k, i, j]
+                    input_gradient[i:i + self.kernel_x, j:j + self.kernel_y] += \
+                        self.kernel_data[k] * output_gradient[k, i, j]
 
         self.kernel_gradient /= (output_x * output_y)
         self.bias_gradient /= (output_x * output_y)
-
         return input_gradient
 
     def momentum_update(self, learning_rate: float, momentum: float = 0.9):
@@ -159,43 +160,44 @@ class MaxPoolingLayer:
     def forward(self, input_data: np.ndarray) -> np.ndarray:
         self.input_cache = input_data
 
-        input_x, input_y = input_data.shape
+        input_z, input_x, input_y = input_data.shape
         output_x = input_x // self.pool_size
         output_y = input_y // self.pool_size
 
-        output = np.zeros((output_x, output_y))
+        output = np.zeros((input_z, output_x, output_y))
 
-        for i in range(output_x):
-            for j in range(output_y):
-                region = input_data[
-                    i * self.pool_size: (i + 1) * self.pool_size,
-                    j * self.pool_size: (j + 1) * self.pool_size
-                ]
-                output[i, j] = np.max(region)
+        for k in range(input_z):
+            for i in range(output_x):
+                for j in range(output_y):
+                    region = input_data[
+                        k,
+                        i * self.pool_size: (i + 1) * self.pool_size,
+                        j * self.pool_size: (j + 1) * self.pool_size
+                    ]
+                    output[k, i, j] = np.max(region)
         return output
 
     def backward(self, output_gradient: np.ndarray) -> np.ndarray:
         input_data = self.input_cache
+        input_z, input_x, input_y = input_data.shape
+        output_z, output_x, output_y = output_gradient.shape
         input_gradient = np.zeros_like(input_data)
 
-        for i in range(output_gradient.shape[0]):
-            for j in range(output_gradient.shape[1]):
-                region = input_data[
-                    i * self.pool_size: (i + 1) * self.pool_size,
-                    j * self.pool_size: (j + 1) * self.pool_size
-                ]
+        for k in range(input_z):
+            for i in range(output_x):
+                for j in range(output_y):
+                    region = input_data[
+                        k,
+                        i * self.pool_size: (i + 1) * self.pool_size,
+                        j * self.pool_size: (j + 1) * self.pool_size
+                    ]
+                    max_index = np.unravel_index(np.argmax(region), region.shape)
 
-                max_value = np.max(region)
-                max_index = np.unravel_index(np.argmax(region), region.shape)
-                
-                for x in range(self.pool_size):
-                    for y in range(self.pool_size):
-                        if region[x, y] == max_value:
-                            input_gradient[
-                                i * self.pool_size + max_index[0], 
-                                j * self.pool_size + max_index[1]
-                            ] = output_gradient[i, j]
-
+                    input_gradient[
+                        k,
+                        i * self.pool_size + max_index[0],
+                        j * self.pool_size + max_index[1]
+                    ] = output_gradient[k, i, j]
         return input_gradient
     
 class FlattenLayer:
@@ -226,7 +228,7 @@ class CrossEntropyLossLayer:
     def forward(self, prediction: np.ndarray, target: np.ndarray) -> float:
         epsilon = 1e-12
         prediction = np.clip(prediction, epsilon, 1. - epsilon)
-        loss = -np.sum(np.sum(target * np.log(prediction), axis=1))
+        loss = -np.mean(np.sum(target * np.log(prediction), axis=1))
         return loss
     
     def backward(self, prediction: np.ndarray, target: np.ndarray) -> np.ndarray:

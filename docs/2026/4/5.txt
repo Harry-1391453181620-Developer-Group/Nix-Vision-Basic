@@ -4,3 +4,26 @@ Things done:
 3.  Fixed errors in layers.py, model.py, train.py.
 4.  Modified layers.py to let the CNN layers adaptable to images of any sizes
 5.  Everything ready for the first train, class number = 3.
+6.  Max Pooling Layer:  Forward: for input: X ∈ R^(H × W), with pooling window size = k × k
+                        Output: Y[i, j] = max(X[i*k : (i+1)*k, j*k : (j+1)*k]).
+                        Meaning that only the value with the greatest value is passed.
+                        Backward: ∂E/∂X = only max position has gradient, others are 0
+    Flatten Layer:  Forward:for input: X ∈ R^(H × W), it done: -> reshape -> X ∈ (1 × (H · W))
+                            Meaning that it turns multi-dimensienal arrays to 1d array, waiting for FC
+                    Backward:   Reshape back to original shape.
+    Softmax Layer:  softmax(z_i) = exp(z_i) / sum_{j=1 to n} exp(z_j)
+                    z_i   → the i-th input value (logit)
+                    exp   → exponential function (e^x)
+                    n     → total number of classes
+                    sum   → summation over all classes
+                    OR more vividly: probability of class i = exp(score_i) / (exp(score_1) + exp(score_2) + ... + exp(score_n))
+                    Meaning that it turns the numbers for the neurons inti probanilities.
+    Cross Entropy Loss Layer:   L = - sum_{i=1 to n} y_i * log(p_i)
+                                y_i → true label (one-hot, either 0 or 1)
+                                p_i → predicted probability (from softmax)
+                                n   → number of classes
+                                log → natural logarithm
+                                The loss equals negative sum from i equals 1 to n of y sub i times the logarithm of p sub i.
+                                OR more vividly: L = -(y_1*log(p_1) + y_2*log(p_2) + ... + y_n*log(p_n))
+                                Meaning that Cross Entropy measures how wrong your predicted probability distribution is compared to the true distribution.
+                                While for the gradient: ∂L/∂z = p - y (prediction - target)
