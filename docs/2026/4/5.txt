@@ -1,0 +1,6 @@
+Things done: 
+1.  Added: MaxPooling Layer, Flatten Layer, Softmax Layer, Cross Entropy Loss Layer to layers.py
+2.  Rename image_preprocess.py to data_loader.py, to load some images from an entire dataset
+3.  Fixed errors in layers.py, model.py, train.py.
+4.  Modified layers.py to let the CNN layers adaptable to images of any sizes
+5.  Everything ready for the first train, class number = 3.

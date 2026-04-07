@@ -1,17 +1,51 @@
-import numpy as np
+import layers
 
-def convolution_forward(layer: np.ndarray, kernel: np.ndarray, bias: np.ndarray) -> np.ndarray:
-    input_height, input_width = layer.shape
-    kernel_height, kernel_width = kernel.shape
-    output_height = input_height - kernel_height + 1
-    output_width = input_width - kernel_width + 1
-    if not bias.shape == (output_height, output_width):
-        raise ValueError("Bias shape must match the output shape.")
-    output = np.zeros((output_height, output_width))
 
-    for i in range(output_height):
-        for j in range(output_width):
-            chosen_region = layer[i:i+kernel_height, j:j+kernel_width]
-            output[i, j] = np.sum(chosen_region * kernel) + bias[i, j]
-    
-    return output
+class MyAI:
+    def __init__(self, num_classes: int):
+        """
+        num_classes: 分类类别数量（必须和dataset一致）
+        """
+        # CNN结构
+        self.conv = layers.ConvolutionLayer(3, 3)
+        self.relu = layers.ReLULayer()
+        self.pool = layers.MaxPoolingLayer(2)
+
+        self.flatten = layers.FlattenLayer()
+
+        # Fully Connected（Lazy Init）
+        self.fc = layers.FullyConnectedLayer(None, num_classes)
+
+        self.softmax = layers.SoftmaxLayer()
+
+    def forward(self, x):
+        """
+        x: (H, W)
+        """
+        x = self.conv.forward(x)      # -> (H-2, W-2)
+        x = self.relu.forward(x)
+        x = self.pool.forward(x)      # -> downsample
+
+        x = self.flatten.forward(x)   # -> (1, N)
+        x = self.fc.forward(x)        # -> (1, num_classes)
+        x = self.softmax.forward(x)
+
+        return x
+
+    def backward(self, grad):
+        """
+        grad: (1, num_classes)
+        """
+        grad = self.softmax.backward(grad)
+        grad = self.fc.backward(grad)
+        grad = self.flatten.backward(grad)
+        grad = self.pool.backward(grad)
+        grad = self.relu.backward(grad)
+        grad = self.conv.backward(grad)
+
+    def update(self, learning_rate: float, momentum: float = 0.9):
+        """
+        更新参数（目前只有conv + fc有参数）
+        """
+        self.conv.momentum_update(learning_rate, momentum)
+        self.fc.momentum_update(learning_rate, momentum)
