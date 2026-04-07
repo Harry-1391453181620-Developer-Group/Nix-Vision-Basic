@@ -3,11 +3,17 @@ from model import MyAI
 import numpy as np
 import data_loader as dl
 
-def train(model, data, labels, epochs=10, lr=0.01):
+def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
     loss_fn = layers.CrossEntropyLossLayer()
+    current_lr = lr
 
     for epoch in range(epochs):
         total_loss = 0
+        
+        #Shuffle
+        indices = np.random.permutation(len(data))
+        data = data[indices]
+        ladels = labels[indices]
 
         for i in range(len(data)):
             input_data = data[i]
@@ -25,11 +31,16 @@ def train(model, data, labels, epochs=10, lr=0.01):
             model.backward(grad)
 
             # Update
-            model.update(lr)
-
-        print(f"Epoch {epoch}, Loss: {total_loss / len(data)}")
-        if epoch % 5 == 0 and i == 0:
-            print("Prediction:", prediction)
+            model.update(current_lr)
+        correct = 0
+        for i in range(len(data)):
+            pred = model.forward(data[i])
+            if np.argmax(pred) == np.argmax(labels[i]):
+                correct += 1
+        accuracy = correct / len(data)
+        avg_loss = total_loss / len(data)
+        print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {accuracy:.6f}, LR: {current_lr:.6f}")
+        current_lr *= lr_decay
 
 if __name__ == "__main__":
     dataset_path = r"D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset"
@@ -41,4 +52,4 @@ if __name__ == "__main__":
     
     model = MyAI(num_classes=len(class_names))
 
-    train(model, data, labels, epochs=20, lr=0.001)
+    train(model, data, labels, epochs=20, lr=0.001, lr_decay=0.95)

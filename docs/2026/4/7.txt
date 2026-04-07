@@ -1,3 +1,6 @@
 Things done: 
 1.  Further modified train.py, model.py and layers.py to adapt to multi-kernel.
 2.  Run traning, 20 epoches, result: Loss: 0.13981022561993312
+3.  According to the output: I added learning rate decay to train.py because that the loss climbed up
+    after epoch 15, meaninng that the model is diverging, and the momentum update is overeacting.
+    I also added accuracy printout as this is an important evaluation part of the performance.
