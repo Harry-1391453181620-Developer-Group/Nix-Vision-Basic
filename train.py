@@ -24,7 +24,7 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
         #Shuffle
         indices = np.random.permutation(len(data))
         data = data[indices]
-        ladels = labels[indices]
+        labels = labels[indices]
 
         for i in range(len(data)):
             input_data = data[i]
@@ -32,7 +32,7 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
 
             # Forward
             prediction = model.forward(input_data)
-
+            
             # Loss
             loss = loss_fn.forward(prediction, target)
             total_loss += loss
