@@ -14,7 +14,7 @@ def evaluate(model, data, labels):
             correct += 1
     return correct / len(data)
 
-def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
+def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98):
     loss_fn = layers.CrossEntropyLossLayer()
     current_lr = lr
 
@@ -32,7 +32,7 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
 
             # Forward
             prediction = model.forward(input_data)
-            
+
             # Loss
             loss = loss_fn.forward(prediction, target)
             total_loss += loss
@@ -60,4 +60,4 @@ if __name__ == "__main__":
     
     model = MyAI(num_classes=len(class_names))
 
-    train(model, data, labels, epochs=20, lr=0.001, lr_decay=0.95)
+    train(model, data, labels, epochs=20, lr=0.001, lr_decay=0.98)

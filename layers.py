@@ -60,8 +60,8 @@ class ConvolutionLayer:
                     input_gradient[i:i + self.kernel_x, j:j + self.kernel_y] += \
                         self.kernel_data[k] * output_gradient[k, i, j]
 
-        self.kernel_gradient /= (output_x * output_y)
-        self.bias_gradient /= (output_x * output_y)
+        #self.kernel_gradient /= (output_x * output_y)
+        #self.bias_gradient /= (output_x * output_y)
         return input_gradient
 
     def momentum_update(self, learning_rate: float, momentum: float = 0.9):

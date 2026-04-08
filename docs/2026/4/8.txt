@@ -39,8 +39,19 @@ Things done:
 
 4.  KEY EXPERIENCE: NEVER RUN FORWARD() FOR EVALUATION IN THE MIDDLE OF A TRAINING LOOP, ONLY AT THE END OF A FULL EPOCH!
 
+5.  Second attempt was successful，20 epoches, result: Epoch 19, Loss: 0.750073, Accuracy: 68.31%, LR: 0.000377
+    1.  Results and discoveries: 
+        1.  Although the model is truely learning now, the accuracy still swing in 0.66-0.68, this is probably beccause lr is too low after epoch 15
+
+        2.  I noticed in the convolution layers, 
+            self.kernel_gradient /= (output_x * output_y)
+            self.bias_gradient /= (output_x * output_y)
+            let the layer learning at only 1/3944 th the speed they should be...
+    
+    2.  Fix: comment the stuff in convolution layers and set lr_dacay to 0.98.
+
 Appendix:
-1. traning output: PS D:\Programing_materials\Python\python_Projects\My_AI> & D:\Programing_materials\Python\Python3.12.2\python.exe d:/Programing_materials/Python/python_Projects/My_AI/train.py
+1. traning output 1: PS D:\Programing_materials\Python\python_Projects\My_AI> & D:\Programing_materials\Python\Python3.12.2\python.exe d:/Programing_materials/Python/python_Projects/My_AI/train.py
 C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
   warnings.warn(
 Classes: ['airplane', 'bird', 'cat']
@@ -65,3 +76,29 @@ Epoch 16, Loss: 0.181466, Accuracy: 0.278257, LR: 0.000440
 Epoch 17, Loss: 0.198447, Accuracy: 0.278257, LR: 0.000418
 Epoch 18, Loss: 0.183976, Accuracy: 0.278257, LR: 0.000397
 Epoch 19, Loss: 0.185337, Accuracy: 0.276613, LR: 0.000377
+
+2. training output 2: PS D:\Programing_materials\Python\python_Projects\My_AI> & D:\Programing_materials\Python\Python3.12.2\python.exe d:/Programing_materials/Python/python_Projects/My_AI/train.py
+C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+Classes: ['airplane', 'bird', 'cat']
+Data shape: (2433, 64, 64)
+Epoch 0, Loss: 1.049246, Accuracy: 50.06%, LR: 0.001000
+Epoch 1, Loss: 0.974858, Accuracy: 57.50%, LR: 0.000950
+Epoch 2, Loss: 0.931942, Accuracy: 59.23%, LR: 0.000902
+Epoch 3, Loss: 0.900951, Accuracy: 57.25%, LR: 0.000857
+Epoch 4, Loss: 0.878718, Accuracy: 58.65%, LR: 0.000815
+Epoch 5, Loss: 0.860663, Accuracy: 62.52%, LR: 0.000774
+Epoch 6, Loss: 0.842725, Accuracy: 62.97%, LR: 0.000735
+Epoch 7, Loss: 0.830760, Accuracy: 64.49%, LR: 0.000698
+Epoch 8, Loss: 0.814264, Accuracy: 64.08%, LR: 0.000663
+Epoch 9, Loss: 0.808754, Accuracy: 65.31%, LR: 0.000630
+Epoch 10, Loss: 0.798989, Accuracy: 65.39%, LR: 0.000599
+Epoch 11, Loss: 0.792013, Accuracy: 66.38%, LR: 0.000569
+Epoch 12, Loss: 0.784500, Accuracy: 63.83%, LR: 0.000540
+Epoch 13, Loss: 0.779649, Accuracy: 67.04%, LR: 0.000513
+Epoch 14, Loss: 0.773048, Accuracy: 66.63%, LR: 0.000488
+Epoch 15, Loss: 0.765064, Accuracy: 66.30%, LR: 0.000463
+Epoch 16, Loss: 0.762152, Accuracy: 68.19%, LR: 0.000440
+Epoch 17, Loss: 0.758252, Accuracy: 66.17%, LR: 0.000418
+Epoch 18, Loss: 0.754585, Accuracy: 67.00%, LR: 0.000397
+Epoch 19, Loss: 0.750073, Accuracy: 68.31%, LR: 0.000377
