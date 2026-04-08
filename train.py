@@ -3,6 +3,17 @@ from model import MyAI
 import numpy as np
 import data_loader as dl
 
+def predict(model, x):
+    return model.forward(x)
+
+def evaluate(model, data, labels):
+    correct = 0
+    for i in range(len(data)):
+        pred = predict(model, data[i])
+        if np.argmax(pred) == np.argmax(labels[i]):
+            correct += 1
+    return correct / len(data)
+
 def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
     loss_fn = layers.CrossEntropyLossLayer()
     current_lr = lr
@@ -32,14 +43,11 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.95):
 
             # Update
             model.update(current_lr)
-        correct = 0
-        for i in range(len(data)):
-            pred = model.forward(data[i])
-            if np.argmax(pred) == np.argmax(labels[i]):
-                correct += 1
-        accuracy = correct / len(data)
+
         avg_loss = total_loss / len(data)
-        print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {accuracy:.6f}, LR: {current_lr:.6f}")
+        accuracy = evaluate(model, data, labels)
+        
+        print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {accuracy:.2%}, LR: {current_lr:.6f}")
         current_lr *= lr_decay
 
 if __name__ == "__main__":

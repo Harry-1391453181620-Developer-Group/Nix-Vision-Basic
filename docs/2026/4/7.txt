@@ -4,3 +4,30 @@ Things done:
 3.  According to the output: I added learning rate decay to train.py because that the loss climbed up
     after epoch 15, meaninng that the model is diverging, and the momentum update is overeacting.
     I also added accuracy printout as this is an important evaluation part of the performance.
+
+Appendix:
+1. output of traning: D:\Programing_materials\Python\python_Projects\My_AI> & D:\Programing_materials\Python\Python3.12.2\python.exe d:/Programing_materials/Python/python_Projects/My_AI/train.py
+C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+Classes: ['airplane', 'bird', 'cat']
+Data shape: (2433, 64, 64)
+Epoch 0, Loss: 0.07670888880082484
+Epoch 1, Loss: 0.1989910415219997
+Epoch 2, Loss: 0.18457446711312323
+Epoch 3, Loss: 0.17036232859417796
+Epoch 4, Loss: 0.1587520874682372
+Epoch 5, Loss: 0.15072512132644833
+Epoch 6, Loss: 0.14581989363360726
+Epoch 7, Loss: 0.1430588827979425
+Epoch 8, Loss: 0.14143153377146198
+Epoch 9, Loss: 0.1402571494640873
+Epoch 10, Loss: 0.13923173352823717
+Epoch 11, Loss: 0.13830672922320336
+Epoch 12, Loss: 0.13753423868142411
+Epoch 13, Loss: 0.13696553353677635
+Epoch 14, Loss: 0.1366425918381054
+Epoch 15, Loss: 0.13660574149763505
+Epoch 16, Loss: 0.13688098149394445
+Epoch 17, Loss: 0.13747284011059918
+Epoch 18, Loss: 0.1384260557251096
+Epoch 19, Loss: 0.13981022561993312

@@ -1,0 +1,67 @@
+Things done:
+1.  Run traning for the changes made in 2026/4/7, 20 epoches, result: Epoch 19, Loss: 0.185337, Accuracy: 0.276613, LR: 0.000377
+    1.  Results and discovers:
+        1.  The accuracy stayed still in around 27.28%, this is even lower than random choosing within three classes.
+            This means that the model is predicting the same class for each image in each epoch, which is definetly not
+            a good trend.
+
+        2.  The loss, again, jumps from 0.838 to 0.303 in Epoch 0 and Epoch 1. This is suspicious as the loss of the first
+            epoch is much lower than other epoch.
+
+        3.  It is super interesting that 27.78% is NOT A RANDOM NUMBER. As there are 2433 images in total, 
+            and 2433 * 0.2778 nearly equals to 676, this is VERY SIMILAR to a size of one class. So this proved
+            the suggestion in 1., that the model is predicting only one class...
+
+    2. Cause analysation:
+        In the code segment: 
+            # FROM TRAIN.PY, version: git hash: e936c264bc6aa128b9601bca245f16fc1a22ed80, lines: 14-16 and 36-37
+            # Training loop runs and shuffles data...
+            indices = np.random.permutation(len(data))
+            data = data[indices]       # ← data is shuffled IN PLACE
+            labels = labels[indices]   # ← labels shuffled to match
+
+            # Then accuracy loop runs forward() on every sample...
+            for i in range(len(data)):
+                pred = model.forward(data[i])   # ← THIS IS THE PROBLEM
+
+        It is known that model.forward() updates input_cache in every layer. So when the accuracy loop runs after traning, it is overwritting all of the 
+        cached activations from the last traning sample. If the model.backward() is then called on the next epoch's first sample, it back-propagates 
+        through the accuracy evaluation's cached data, not the training sample's data.
+        
+    3.  Fix: Seperate evaluation from the training. 
+
+2.  So, applying the fix, a predict function that desen't interfere with training state.
+
+3.  Something that is also interesting: My layers stores states (input/output_cache) to enable back-propagation. 
+    This means a forward pass always has side effects, as it mutates the layer's internal state.
+    This is actually why frameworks like PyTorch have a model.eval() and model.train() mode switch, 
+    where evaluation mode disables gradient traching and cache updates.
+
+4.  KEY EXPERIENCE: NEVER RUN FORWARD() FOR EVALUATION IN THE MIDDLE OF A TRAINING LOOP, ONLY AT THE END OF A FULL EPOCH!
+
+Appendix:
+1. traning output: PS D:\Programing_materials\Python\python_Projects\My_AI> & D:\Programing_materials\Python\Python3.12.2\python.exe d:/Programing_materials/Python/python_Projects/My_AI/train.py
+C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+Classes: ['airplane', 'bird', 'cat']
+Data shape: (2433, 64, 64)
+Epoch 0, Loss: 0.083804, Accuracy: 0.277846, LR: 0.001000
+Epoch 1, Loss: 0.303158, Accuracy: 0.277846, LR: 0.000950
+Epoch 2, Loss: 0.355768, Accuracy: 0.277846, LR: 0.000902
+Epoch 3, Loss: 0.337029, Accuracy: 0.277846, LR: 0.000857
+Epoch 4, Loss: 0.259989, Accuracy: 0.277846, LR: 0.000815
+Epoch 5, Loss: 0.231419, Accuracy: 0.277846, LR: 0.000774
+Epoch 6, Loss: 0.240308, Accuracy: 0.277435, LR: 0.000735
+Epoch 7, Loss: 0.236721, Accuracy: 0.278668, LR: 0.000698
+Epoch 8, Loss: 0.213346, Accuracy: 0.278668, LR: 0.000663
+Epoch 9, Loss: 0.207982, Accuracy: 0.279079, LR: 0.000630
+Epoch 10, Loss: 0.228550, Accuracy: 0.277846, LR: 0.000599
+Epoch 11, Loss: 0.217303, Accuracy: 0.277846, LR: 0.000569
+Epoch 12, Loss: 0.196529, Accuracy: 0.278257, LR: 0.000540
+Epoch 13, Loss: 0.183392, Accuracy: 0.279490, LR: 0.000513
+Epoch 14, Loss: 0.181491, Accuracy: 0.278257, LR: 0.000488
+Epoch 15, Loss: 0.186739, Accuracy: 0.278668, LR: 0.000463
+Epoch 16, Loss: 0.181466, Accuracy: 0.278257, LR: 0.000440
+Epoch 17, Loss: 0.198447, Accuracy: 0.278257, LR: 0.000418
+Epoch 18, Loss: 0.183976, Accuracy: 0.278257, LR: 0.000397
+Epoch 19, Loss: 0.185337, Accuracy: 0.276613, LR: 0.000377
