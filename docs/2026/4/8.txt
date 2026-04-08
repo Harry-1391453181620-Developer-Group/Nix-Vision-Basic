@@ -50,6 +50,19 @@ Things done:
     
     2.  Fix: comment the stuff in convolution layers and set lr_dacay to 0.98.
 
+6.  Also, add attributes to the training config: 
+    --dataset-path
+    --num-classes
+    --lr       
+    --lr-decay  
+    --epochs    
+    --saving  
+    --no-saving
+    --save-to  
+    --loading
+    --no-loading
+    --load-from 
+
 Appendix:
 1. traning output 1: PS D:\Programing_materials\Python\python_Projects\My_AI> & D:\Programing_materials\Python\Python3.12.2\python.exe d:/Programing_materials/Python/python_Projects/My_AI/train.py
 C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
