@@ -59,7 +59,7 @@ def load_model(model, path="model.npz"):
     print(f"Model loaded from {path}")
     return model
 
-def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98):
+def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98, save=True, save_to="model.npz"):
     loss_fn = layers.CrossEntropyLossLayer()
     current_lr = lr
 
@@ -95,7 +95,8 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98):
         print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {accuracy:.2%}, LR: {current_lr:.6f}")
         current_lr *= lr_decay
 
-    save_model(model)
+    if save:
+        save_model(model, save_to)
 
 if __name__ == "__main__":
     args = parse_args()
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     print("Data shape:", data.shape)
     
     model = MyAI(num_classes=len(class_names))
-    
+
     if args.loading and not args.no_loading:
         model.forward(data[0])
         load_model(model, args.load_from)
