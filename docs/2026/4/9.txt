@@ -1,0 +1,64 @@
+Things done:
+1.  Runned training: 40 epoches, result: Epoch 39, Loss: 0.064392, Accuracy: 99.75%, LR: 0.000455
+    1.  Analysis: The acc is currently counted using train_acc, but not val_acc, so there might be 
+        overfitting.
+    2.  Fix: add train_data, val_data seperation, and print all those stuff.
+2.  Implement the fix to train.py
+3.  The model trained can be saved and load now.
+
+
+
+
+
+
+
+
+
+
+Appendix: 
+PS D:\Programing_materials\Python\python_Projects\My_AI> python train.py --dataset-path "D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset" --num-classes 3 --epochs 40 --saving
+C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+Classes: ['airplane', 'bird', 'cat']
+Data shape: (2433, 64, 64)
+Epoch 0, Loss: 1.079614, Accuracy: 44.06%, LR: 0.001000
+Epoch 1, Loss: 1.063183, Accuracy: 47.68%, LR: 0.000980
+Epoch 2, Loss: 1.020426, Accuracy: 56.56%, LR: 0.000960
+Epoch 3, Loss: 0.953952, Accuracy: 58.45%, LR: 0.000941
+Epoch 4, Loss: 0.890666, Accuracy: 64.82%, LR: 0.000922
+Epoch 5, Loss: 0.831772, Accuracy: 66.09%, LR: 0.000904
+Epoch 6, Loss: 0.783858, Accuracy: 70.32%, LR: 0.000886
+Epoch 7, Loss: 0.740820, Accuracy: 70.94%, LR: 0.000868
+Epoch 8, Loss: 0.695035, Accuracy: 75.05%, LR: 0.000851
+Epoch 9, Loss: 0.664236, Accuracy: 78.09%, LR: 0.000834
+Epoch 10, Loss: 0.611688, Accuracy: 77.85%, LR: 0.000817
+Epoch 11, Loss: 0.578016, Accuracy: 78.87%, LR: 0.000801
+Epoch 12, Loss: 0.548575, Accuracy: 79.37%, LR: 0.000785
+Epoch 13, Loss: 0.512366, Accuracy: 85.00%, LR: 0.000769
+Epoch 14, Loss: 0.473720, Accuracy: 79.94%, LR: 0.000754
+Epoch 15, Loss: 0.442237, Accuracy: 85.90%, LR: 0.000739
+Epoch 16, Loss: 0.409475, Accuracy: 87.51%, LR: 0.000724
+Epoch 17, Loss: 0.384504, Accuracy: 86.52%, LR: 0.000709
+Epoch 18, Loss: 0.356852, Accuracy: 91.41%, LR: 0.000695
+Epoch 19, Loss: 0.329075, Accuracy: 90.88%, LR: 0.000681
+Epoch 20, Loss: 0.310746, Accuracy: 90.63%, LR: 0.000668
+Epoch 21, Loss: 0.273857, Accuracy: 93.59%, LR: 0.000654
+Epoch 22, Loss: 0.262792, Accuracy: 93.18%, LR: 0.000641
+Epoch 23, Loss: 0.236500, Accuracy: 93.14%, LR: 0.000628
+Epoch 24, Loss: 0.223244, Accuracy: 94.57%, LR: 0.000616
+Epoch 25, Loss: 0.205623, Accuracy: 95.52%, LR: 0.000603
+Epoch 26, Loss: 0.186469, Accuracy: 91.29%, LR: 0.000591
+Epoch 27, Loss: 0.174140, Accuracy: 94.99%, LR: 0.000580
+Epoch 28, Loss: 0.159601, Accuracy: 97.78%, LR: 0.000568
+Epoch 29, Loss: 0.145963, Accuracy: 96.88%, LR: 0.000557
+Epoch 30, Loss: 0.135221, Accuracy: 98.15%, LR: 0.000545
+Epoch 31, Loss: 0.122239, Accuracy: 97.99%, LR: 0.000535
+Epoch 32, Loss: 0.109606, Accuracy: 97.66%, LR: 0.000524
+Epoch 33, Loss: 0.101957, Accuracy: 98.31%, LR: 0.000513
+Epoch 34, Loss: 0.095998, Accuracy: 99.05%, LR: 0.000503
+Epoch 35, Loss: 0.085605, Accuracy: 99.22%, LR: 0.000493
+Epoch 36, Loss: 0.079471, Accuracy: 99.26%, LR: 0.000483
+Epoch 37, Loss: 0.070626, Accuracy: 98.60%, LR: 0.000474
+Epoch 38, Loss: 0.068356, Accuracy: 99.42%, LR: 0.000464
+Epoch 39, Loss: 0.064392, Accuracy: 99.75%, LR: 0.000455
+Model saved to model.npz

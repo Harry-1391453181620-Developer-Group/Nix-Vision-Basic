@@ -31,6 +31,13 @@ def parse_args():
 def predict(model, x):
     return model.forward(x)
 
+def split_data(data, labels, val_ratio=0.2):
+    indices = np.random.permutation(len(data))
+    split = int(len(data) * (1 - val_ratio))
+    train_idx = indices[:split]
+    val_idx   = indices[split:]
+    return data[train_idx], labels[train_idx], data[val_idx], labels[val_idx]
+
 def evaluate(model, data, labels):
     correct = 0
     for i in range(len(data)):
@@ -59,7 +66,16 @@ def load_model(model, path="model.npz"):
     print(f"Model loaded from {path}")
     return model
 
-def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98, save=True, save_to="model.npz"):
+def train(model, 
+          data, 
+          labels, 
+          epochs=10, 
+          lr=0.001, 
+          lr_decay=0.98, 
+          save=True, 
+          save_to="model.npz", 
+          val_data=None, 
+          val_labels=None):
     loss_fn = layers.CrossEntropyLossLayer()
     current_lr = lr
 
@@ -90,9 +106,14 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98, save=True, sa
             model.update(current_lr)
 
         avg_loss = total_loss / len(data)
-        accuracy = evaluate(model, data, labels)
+        train_acc = evaluate(model, data, labels)
         
-        print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {accuracy:.2%}, LR: {current_lr:.6f}")
+        if val_data is not None:
+            val_acc = evaluate(model, val_data, val_labels)
+            print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Train: {train_acc:.2%}, Val: {val_acc:.2%}, LR: {current_lr:.6f}")
+        else:
+            print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {train_acc:.2%}, LR: {current_lr:.6f}")
+        
         current_lr *= lr_decay
 
     if save:
@@ -101,9 +122,12 @@ def train(model, data, labels, epochs=10, lr=0.001, lr_decay=0.98, save=True, sa
 if __name__ == "__main__":
     args = parse_args()
 
-    data, labels, class_names = dl.load_dataset(args.dataset_path, max_classes=args.num_classes)
+    data, labels, class_names = dl.load_dataset(args.dataset_path, 
+                                                max_classes=args.num_classes)
+    train_data, train_labels, val_data, val_labels = split_data(data, labels, val_ratio=0.2)
 
     print("Classes:", class_names)
+    print(f"Train: {len(train_data)} samples, Val: {len(val_data)} samples")
     print("Data shape:", data.shape)
     
     model = MyAI(num_classes=len(class_names))
@@ -118,4 +142,6 @@ if __name__ == "__main__":
           lr=args.lr,
           lr_decay=args.lr_decay,
           save=should_save,
-          save_to=args.save_to)
+          save_to=args.save_to,
+          val_data=val_data,
+          val_labels=val_labels)
