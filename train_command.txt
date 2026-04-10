@@ -1,0 +1,1 @@
+python train.py --dataset-path "D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset" --num-classes 3 --epochs 40 --saving --no-loading
