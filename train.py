@@ -90,6 +90,7 @@ def train(model,
           val_labels=None):
     loss_fn = layers.CrossEntropyLossLayer()
     current_lr = lr
+    best_val_acc = 0.0
 
     for epoch in range(epochs):
         total_loss = 0
@@ -135,8 +136,11 @@ def train(model,
         
         current_lr *= lr_decay
 
-    if save:
-        save_model(model, save_to)
+    if val_acc > best_val_acc:
+        best_val_acc = val_acc
+        if save:
+            save_model(model, save_to)
+            print(f"  → New best saved! Val: {val_acc:.2%}")
 
 if __name__ == "__main__":
     args = parse_args()
