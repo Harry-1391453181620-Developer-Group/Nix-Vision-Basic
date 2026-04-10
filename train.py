@@ -12,10 +12,13 @@ def parse_args():
     parser.add_argument("--dataset-path", type=str, required=True,      help="Path to dataset directory")
     parser.add_argument("--num-classes",  type=int, default=None,       help="Number of classes to load (default: all)")
 
-    parser.add_argument("--lr",        type=float, default=0.001,       help="Learning rate")
-    parser.add_argument("--lr-decay",  type=float, default=0.98,        help="LR decay per epoch")
+    # Epoch number
     parser.add_argument("--epochs",    type=int,   default=40,          help="Number of epochs")
 
+    # Learning rate
+    parser.add_argument("--lr",        type=float, default=0.001,       help="Learning rate")
+    parser.add_argument("--lr-decay",  type=float, default=0.98,        help="LR decay per epoch")
+    
     # Saving
     parser.add_argument("--saving",    action="store_true",             help="Enable model saving")
     parser.add_argument("--no-saving", action="store_true",             help="Disable model saving")
@@ -48,27 +51,36 @@ def evaluate(model, data, labels):
 
 def save_model(model, path="model.npz"):
     np.savez(path,
-        # Conv layer
-        conv_kernels=model.conv.kernel_data,
-        conv_bias=model.conv.bias_data,
-        # FC layer
-        fc_weights=model.fc.weights,
-        fc_bias=model.fc.bias
+        #Conv
+        conv1_kernels=model.conv1.kernel_data,
+        conv1_bias=model.conv1.bias_data,
+        conv2_kernels=model.conv2.kernel_data,
+        conv2_bias=model.conv2.bias_data,
+
+        #FC
+        fc1_weights=model.fc1.weights,
+        fc1_bias=model.fc1.bias,
+        fc2_weights=model.fc2.weights,
+        fc2_bias=model.fc2.bias
     )
     print(f"Model saved to {path}")
 
 def load_model(model, path="model.npz"):
-    data = np.load(path)
-    model.conv.kernel_data = data["conv_kernels"]
-    model.conv.bias_data = data["conv_bias"]
-    model.fc.weights = data["fc_weights"]
-    model.fc.bias = data["fc_bias"]
+    d = np.load(path)
+    model.conv1.kernel_data = d["conv1_kernels"]
+    model.conv1.bias_data   = d["conv1_bias"]
+    model.conv2.kernel_data = d["conv2_kernels"]
+    model.conv2.bias_data   = d["conv2_bias"]
+    model.fc1.weights = d["fc1_weights"]
+    model.fc1.bias    = d["fc1_bias"]
+    model.fc2.weights = d["fc2_weights"]
+    model.fc2.bias    = d["fc2_bias"]
     print(f"Model loaded from {path}")
     return model
 
 def train(model, 
-          data, 
-          labels, 
+          train_data, 
+          train_labels, 
           epochs=10, 
           lr=0.001, 
           lr_decay=0.98, 
@@ -83,13 +95,13 @@ def train(model,
         total_loss = 0
         
         #Shuffle
-        indices = np.random.permutation(len(data))
-        data = data[indices]
-        labels = labels[indices]
+        indices = np.random.permutation(len(train_data))
+        train_data = train_data[indices]
+        train_labels = train_labels[indices]
 
-        for i in range(len(data)):
-            input_data = data[i]
-            target = labels[i].reshape(1, -1)
+        for i in range(len(train_data)):
+            input_data = train_data[i]
+            target = train_labels[i].reshape(1, -1)
 
             # Forward
             prediction = model.forward(input_data)
@@ -105,14 +117,21 @@ def train(model,
             # Update
             model.update(current_lr)
 
-        avg_loss = total_loss / len(data)
-        train_acc = evaluate(model, data, labels)
+        train_loss = total_loss / len(train_data)
+        train_acc = evaluate(model, train_data, train_labels)
         
         if val_data is not None:
+            val_total_loss = 0
+            for i in range(len(val_data)):
+                pred = model.forward(val_data[i])
+                val_total_loss += loss_fn.forward(pred, val_labels[i].reshape(1, -1))
+            val_loss = val_total_loss / len(val_data)
             val_acc = evaluate(model, val_data, val_labels)
-            print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Train: {train_acc:.2%}, Val: {val_acc:.2%}, LR: {current_lr:.6f}")
+
+            gap = train_acc - val_acc
+            print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Train Accuracy: {train_acc:.4%}, Val Loss: {val_loss:.6f}, Val Accuracy: {val_acc:.4%}, Gap: {gap:.6f}, LR: {current_lr:.6f}")
         else:
-            print(f"Epoch {epoch}, Loss: {avg_loss:.6f}, Accuracy: {train_acc:.2%}, LR: {current_lr:.6f}")
+            print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Accuracy: {train_acc:.4%}, LR: {current_lr:.6f}")
         
         current_lr *= lr_decay
 

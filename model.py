@@ -4,36 +4,59 @@ import layers
 class MyAI:
     def __init__(self, num_classes: int):
         # CNN Structure
-        self.conv = layers.ConvolutionLayer(num_kernels=8, kernel_x=3, kernel_y=3)
-        self.relu = layers.ReLULayer()
-        self.pool = layers.MaxPoolingLayer(2)
+        self.conv1 = layers.ConvolutionLayer(num_kernels=8, num_channels=1, kernel_x=3, kernel_y=3)
+        self.relu1 = layers.ReLULayer()
+        self.pool1 = layers.MaxPoolingLayer(2)
+
+        self.conv2 = layers.ConvolutionLayer(num_kernels=16, num_channels=8, kernel_x=3, kernel_y=3)
+        self.relu2 = layers.ReLULayer()
+        self.pool2 = layers.MaxPoolingLayer(2)
 
         self.flatten = layers.FlattenLayer()
 
         # Fully Connected（Lazy Init）
-        self.fc = layers.FullyConnectedLayer(None, num_classes)
+        self.fc1 = layers.FullyConnectedLayer(None, 128)
+        self.fc2 = layers.FullyConnectedLayer(128, num_classes)
 
         self.softmax = layers.SoftmaxLayer()
 
     def forward(self, x):
-        x = self.conv.forward(x)
-        x = self.relu.forward(x)
-        x = self.pool.forward(x)
+        x = self.conv1.forward(x)
+        x = self.relu1.forward(x)
+        x = self.pool1.forward(x)
+
+        x = self.conv2.forward(x)
+        x = self.relu2.forward(x)
+        x = self.pool2.forward(x)
 
         x = self.flatten.forward(x)
-        x = self.fc.forward(x)
+
+        x = self.fc1.forward(x)
+        x = self.fc2.forward(x)
+
         x = self.softmax.forward(x)
 
         return x
 
     def backward(self, grad):
         grad = self.softmax.backward(grad)
-        grad = self.fc.backward(grad)
+
+        grad = self.fc2.backward(grad)
+        grad = self.fc1.backward(grad)
+    
+
         grad = self.flatten.backward(grad)
-        grad = self.pool.backward(grad)
-        grad = self.relu.backward(grad)
-        grad = self.conv.backward(grad)
+
+        grad = self.pool2.backward(grad)
+        grad = self.relu2.backward(grad)
+        grad = self.conv2.backward(grad)
+
+        grad = self.pool1.backward(grad)
+        grad = self.relu1.backward(grad)
+        grad = self.conv1.backward(grad)
 
     def update(self, learning_rate: float, momentum: float = 0.9):
-        self.conv.momentum_update(learning_rate, momentum)
-        self.fc.momentum_update(learning_rate, momentum)
+        self.conv1.momentum_update(learning_rate, momentum)
+        self.conv2.momentum_update(learning_rate, momentum)
+        self.fc1.momentum_update(learning_rate, momentum)
+        self.fc2.momentum_update(learning_rate, momentum)

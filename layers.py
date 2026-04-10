@@ -1,12 +1,13 @@
 import numpy as np
 
 class ConvolutionLayer:
-    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int):
+    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int, num_channels: int=1):
         self.num_kernels = num_kernels
         self.kernel_x = kernel_x
         self.kernel_y = kernel_y
+        self.num_channels = num_channels
 
-        self.kernel_data = np.random.randn(num_kernels, kernel_x, kernel_y) * 0.1
+        self.kernel_data = np.random.randn(num_kernels, num_channels, kernel_x, kernel_y) * 0.1
         self.bias_data = np.zeros((num_kernels,))
 
         self.kernel_gradient = np.zeros_like(self.kernel_data)
@@ -19,9 +20,12 @@ class ConvolutionLayer:
         self.input_cache = None
 
     def forward(self, input_data: np.ndarray) -> np.ndarray:
+        if input_data.ndim == 2:
+            input_data = input_data[np.newaxis, :, :]
+
         self.input_cache = input_data
 
-        input_x, input_y = input_data.shape
+        input_c, input_x, input_y = input_data.shape
         
         # Security check
         if input_x < self.kernel_x or input_y < self.kernel_y:
@@ -33,7 +37,7 @@ class ConvolutionLayer:
         for k in range(self.num_kernels):
             for i in range(output_x):
                 for j in range(output_y):
-                    region = self.input_cache[i:i+self.kernel_x, j:j+self.kernel_y]
+                    region = self.input_cache[:, i:i+self.kernel_x, j:j+self.kernel_y]
                     output[k, i, j] = np.sum(region * self.kernel_data[k]) + self.bias_data[k]
         
         return output
@@ -54,10 +58,10 @@ class ConvolutionLayer:
         for k in range(K):
             for i in range(output_x):
                 for j in range(output_y):
-                    region = input_data[i:i+self.kernel_x, j:j+self.kernel_y]
+                    region = input_data[:, i:i+self.kernel_x, j:j+self.kernel_y]
                     self.kernel_gradient[k] += region * output_gradient[k, i, j]
                     self.bias_gradient[k] += output_gradient[k, i, j]
-                    input_gradient[i:i + self.kernel_x, j:j + self.kernel_y] += \
+                    input_gradient[:, i:i + self.kernel_x, j:j + self.kernel_y] += \
                         self.kernel_data[k] * output_gradient[k, i, j]
 
         #self.kernel_gradient /= (output_x * output_y)
