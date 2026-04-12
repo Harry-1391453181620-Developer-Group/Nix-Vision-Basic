@@ -1,0 +1,8 @@
+Things done:
+1.  expand dataset into 13 classes
+2.  Discovered from Pytorch the im2col algorithm, implement in layers.py (Convolution layer)
+    im2col is bacisally turning the image input array into a flattened one that each line is a region for Convolution
+    col2im is basically the reverse of im2col
+3.  It took around 30 minutes for the former version to go through 1 epoch.
+3.  Run training, 40 epoches, 3min8sec16msec/epoch, 10 times faster!!!
+    Moreover, the val_acc starts from 56% instead from 44% now!

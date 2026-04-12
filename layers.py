@@ -18,6 +18,42 @@ class ConvolutionLayer:
         self.bias_velocity = np.zeros_like(self.bias_data)
 
         self.input_cache = None
+        self.col_cache = None # col cache for backward
+
+    def im2col(self, input_data: np.ndarray, kernel_x, kernel_y) -> np.ndarray:
+        """Turns input image array into flattened array, ready for @ with the kernels."""
+
+        input_channels, input_x, input_y = input_data.shape
+        output_x = input_x - kernel_x + 1
+        output_y = input_y - kernel_y + 1
+
+        #col (flattened array)
+        col = np.zeros((output_x * output_y, input_channels * kernel_x * kernel_y)) #Using zeros to setup
+        row_index = 0
+        for i in range(output_x):
+            for j in range(output_y):
+                region = input_data[:, i:i+kernel_x, j:j+kernel_y] # the region from original input that should be flattened 
+                flattened_region = region.flatten()
+                col[row_index] = flattened_region
+                row_index += 1
+        return col
+    
+    def col2im(self, col, input_shape, kernel_x, kernel_y):
+        input_channels, input_x, input_y = input_shape
+        output_x = input_x - kernel_x + 1
+        output_y = input_y - kernel_y + 1
+
+        input_gradient = np.zeros((input_channels, input_x, input_y))
+
+        row_index = 0
+        for i in range(output_x):
+            for j in range(output_y):
+                # reshape one row back
+                patch = col[row_index].reshape(input_channels, kernel_x, kernel_y)
+                #add reshaped stuff to corresponding region
+                input_gradient[:, i:i+kernel_x, j:j+kernel_y] += patch
+                row_index += 1
+        return input_gradient
 
     def forward(self, input_data: np.ndarray) -> np.ndarray:
         if input_data.ndim == 2:
@@ -25,7 +61,7 @@ class ConvolutionLayer:
 
         self.input_cache = input_data
 
-        input_c, input_x, input_y = input_data.shape
+        input_channels, input_x, input_y = input_data.shape
         
         # Security check
         if input_x < self.kernel_x or input_y < self.kernel_y:
@@ -33,39 +69,30 @@ class ConvolutionLayer:
         output_x = input_x - self.kernel_x + 1
         output_y = input_y - self.kernel_y + 1
 
-        output = np.zeros((self.num_kernels, output_x, output_y))
-        for k in range(self.num_kernels):
-            for i in range(output_x):
-                for j in range(output_y):
-                    region = self.input_cache[:, i:i+self.kernel_x, j:j+self.kernel_y]
-                    output[k, i, j] = np.sum(region * self.kernel_data[k]) + self.bias_data[k]
-        
+        col = self.im2col(input_data, self.kernel_x, self.kernel_y)
+
+        #flatten the kernel
+        flattened_kernel = self.kernel_data.reshape(self.num_kernels, - 1)
+
+        #using @ instead of multiple for loops
+        output = (flattened_kernel @ col.T) + self.bias_data.reshape(-1, 1)
+        output = output.reshape(self.num_kernels, output_x, output_y)
+
+        self.col_cache = col
         return output
     
     def backward(self, output_gradient: np.ndarray) -> np.ndarray:
-        # Security check
-        if self.input_cache is None:
-            raise ValueError("Run forward before backward.")
-        input_data = self.input_cache
-
         K, output_x, output_y = output_gradient.shape
 
-        self.kernel_gradient.fill(0)
-        self.bias_gradient.fill(0)
+        gradient_reshaped = output_gradient.reshape(self.num_kernels, -1)
+        self.kernel_gradient = (gradient_reshaped @ self.col_cache).reshape(self.kernel_data.shape)
+        self.bias_gradient = np.sum(gradient_reshaped, axis=1)
 
-        input_gradient = np.zeros_like(input_data)
-    
-        for k in range(K):
-            for i in range(output_x):
-                for j in range(output_y):
-                    region = input_data[:, i:i+self.kernel_x, j:j+self.kernel_y]
-                    self.kernel_gradient[k] += region * output_gradient[k, i, j]
-                    self.bias_gradient[k] += output_gradient[k, i, j]
-                    input_gradient[:, i:i + self.kernel_x, j:j + self.kernel_y] += \
-                        self.kernel_data[k] * output_gradient[k, i, j]
+        kernel_matrix = self.kernel_data.reshape(self.num_kernels, -1)
+        col_gradient = (kernel_matrix.T @ gradient_reshaped).T
 
-        #self.kernel_gradient /= (output_x * output_y)
-        #self.bias_gradient /= (output_x * output_y)
+        input_gradient = self.col2im(col_gradient, self.input_cache.shape, self.kernel_x, self.kernel_y)
+
         return input_gradient
 
     def momentum_update(self, learning_rate: float, momentum: float = 0.9):
