@@ -7,7 +7,8 @@ class ConvolutionLayer:
         self.kernel_y = kernel_y
         self.num_channels = num_channels
 
-        self.kernel_data = np.random.randn(num_kernels, num_channels, kernel_x, kernel_y) * 0.1
+        self.kernel_data = np.random.randn(num_kernels, num_channels, kernel_x, kernel_y) \
+                           * np.sqrt(2.0 / (num_channels * kernel_x * kernel_y)) 
         self.bias_data = np.zeros((num_kernels,))
 
         self.kernel_gradient = np.zeros_like(self.kernel_data)
@@ -134,7 +135,8 @@ class FullyConnectedLayer:
         self.original_shape = None
 
     def _initialize_parameters(self, input_size: int):
-        self.weights = np.random.randn(input_size, self.output_size) * 0.1
+        self.weights = np.random.randn(input_size, self.output_size) \
+                       * np.sqrt(2.0 / input_size)
         self.bias = np.zeros((1, self.output_size))
 
         self.weights_gradient = np.zeros_like(self.weights)
@@ -174,6 +176,10 @@ class FullyConnectedLayer:
         
         # ∂E/∂X
         input_gradient = output_gradient @ self.weights.T
+
+        # reshape back to input shape
+        input_gradient = input_gradient.reshape(self.original_shape)
+
         return input_gradient
     
     def momentum_update(self, learning_rate: float, momentum: float = 0.9):

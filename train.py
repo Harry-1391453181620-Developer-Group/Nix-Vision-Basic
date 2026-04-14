@@ -2,7 +2,6 @@ import layers
 from model import MyAI
 import numpy as np
 import data_loader as dl
-
 import argparse
 
 def parse_args():
@@ -118,6 +117,16 @@ def train(model,
             # Update
             model.update(current_lr)
 
+            # temp debug
+            if epoch == 0 and i < 5:
+                print(f"  pred={np.argmax(prediction)}, target={np.argmax(target)}, probs={prediction.round(3)}")
+            if epoch == 0 and i == len(train_data) - 1:
+                print(f"Conv1 grad: {np.abs(model.conv1.kernel_gradient).mean():.8f}")
+                print(f"Conv2 grad: {np.abs(model.conv2.kernel_gradient).mean():.8f}")
+                print(f"FC1 grad:   {np.abs(model.fc1.weights_gradient).mean():.8f}")
+                print(f"FC2 grad:   {np.abs(model.fc2.weights_gradient).mean():.8f}")
+            # temp debug end
+
         train_loss = total_loss / len(train_data)
         train_acc = evaluate(model, train_data, train_labels)
         
@@ -131,16 +140,16 @@ def train(model,
 
             gap = train_acc - val_acc
             print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Train Accuracy: {train_acc:.4%}, Val Loss: {val_loss:.6f}, Val Accuracy: {val_acc:.4%}, Gap: {gap:.6f}, LR: {current_lr:.6f}")
+
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                if save:
+                    save_model(model, save_to)
+                    print(f"  → New best saved! Val: {val_acc:.2%}")
         else:
             print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Accuracy: {train_acc:.4%}, LR: {current_lr:.6f}")
         
         current_lr *= lr_decay
-
-    if val_acc > best_val_acc:
-        best_val_acc = val_acc
-        if save:
-            save_model(model, save_to)
-            print(f"  → New best saved! Val: {val_acc:.2%}")
 
 if __name__ == "__main__":
     args = parse_args()
@@ -148,7 +157,7 @@ if __name__ == "__main__":
     data, labels, class_names = dl.load_dataset(args.dataset_path, 
                                                 max_classes=args.num_classes)
     train_data, train_labels, val_data, val_labels = split_data(data, labels, val_ratio=0.2)
-
+    
     print("Classes:", class_names)
     print(f"Train: {len(train_data)} samples, Val: {len(val_data)} samples")
     print("Data shape:", data.shape)
@@ -160,7 +169,7 @@ if __name__ == "__main__":
         load_model(model, args.load_from)
 
     should_save = args.saving and not args.no_saving
-    train(model, data, labels,
+    train(model, train_data, train_labels,
           epochs=args.epochs,
           lr=args.lr,
           lr_decay=args.lr_decay,

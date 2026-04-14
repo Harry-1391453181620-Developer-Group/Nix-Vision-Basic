@@ -16,6 +16,7 @@ class MyAI:
 
         # Fully Connected（Lazy Init）
         self.fc1 = layers.FullyConnectedLayer(None, 128)
+        self.fc_relu = layers.ReLULayer()
         self.fc2 = layers.FullyConnectedLayer(128, num_classes)
 
         self.softmax = layers.SoftmaxLayer()
@@ -32,6 +33,7 @@ class MyAI:
         x = self.flatten.forward(x)
 
         x = self.fc1.forward(x)
+        x = self.fc_relu.forward(x)
         x = self.fc2.forward(x)
 
         x = self.softmax.forward(x)
@@ -42,6 +44,7 @@ class MyAI:
         grad = self.softmax.backward(grad)
 
         grad = self.fc2.backward(grad)
+        grad = self.fc_relu.backward(grad)
         grad = self.fc1.backward(grad)
     
 
