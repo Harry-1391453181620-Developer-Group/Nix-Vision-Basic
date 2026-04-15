@@ -1,0 +1,54 @@
+Things done:
+1.  The Spyder IDE shows that in FC1 layer, the shape is: (3136, 64) This is toooo big for my dataset and overfitting is inevitable.
+2.  Solution: Add GlobalAveragePoolingLayer, replacing FlattenLayer.
+3.  Runned traning 100 epoches, cut at 22 epoch. There is significant improvement, but still not as large as I expected.
+
+Epoch 0, Train Loss: 2.522434, Train Accuracy: 12.4565%, Val Loss: 2.496211, Val Accuracy: 14.3212%, Gap: -0.018647, LR: 0.001000
+Model saved to model.npz
+  → New best saved! Val: 14.32%
+Epoch 1, Train Loss: 2.462245, Train Accuracy: 15.5644%, Val Loss: 2.417753, Val Accuracy: 15.3158%, Gap: 0.002486, LR: 0.000990
+Model saved to model.npz
+  → New best saved! Val: 15.32%
+Epoch 2, Train Loss: 2.383585, Train Accuracy: 19.3933%, Val Loss: 2.379569, Val Accuracy: 18.9955%, Gap: 0.003978, LR: 0.000980
+Model saved to model.npz
+  → New best saved! Val: 19.00%
+Epoch 3, Train Loss: 2.291417, Train Accuracy: 23.6077%, Val Loss: 2.238245, Val Accuracy: 24.0676%, Gap: -0.004600, LR: 0.000970
+Model saved to model.npz
+  → New best saved! Val: 24.07%
+Epoch 4, Train Loss: 2.232370, Train Accuracy: 23.1850%, Val Loss: 2.212872, Val Accuracy: 21.7305%, Gap: 0.014545, LR: 0.000961
+Epoch 5, Train Loss: 2.195978, Train Accuracy: 26.2805%, Val Loss: 2.143839, Val Accuracy: 25.1616%, Gap: 0.011188, LR: 0.000951
+Model saved to model.npz
+  → New best saved! Val: 25.16%
+Epoch 6, Train Loss: 2.159743, Train Accuracy: 28.8538%, Val Loss: 2.097275, Val Accuracy: 28.7419%, Gap: 0.001119, LR: 0.000941
+Model saved to model.npz
+  → New best saved! Val: 28.74%
+Epoch 7, Train Loss: 2.126453, Train Accuracy: 27.4366%, Val Loss: 2.141179, Val Accuracy: 26.5540%, Gap: 0.008826, LR: 0.000932
+Epoch 8, Train Loss: 2.105031, Train Accuracy: 29.6619%, Val Loss: 2.086034, Val Accuracy: 29.1397%, Gap: 0.005221, LR: 0.000923
+Model saved to model.npz
+  → New best saved! Val: 29.14%
+Epoch 9, Train Loss: 2.077732, Train Accuracy: 31.4769%, Val Loss: 2.029199, Val Accuracy: 31.6758%, Gap: -0.001989, LR: 0.000914
+Model saved to model.npz
+  → New best saved! Val: 31.68%
+Epoch 10, Train Loss: 2.055657, Train Accuracy: 30.4078%, Val Loss: 2.034469, Val Accuracy: 30.3332%, Gap: 0.000746, LR: 0.000904
+Epoch 11, Train Loss: 2.034931, Train Accuracy: 31.1785%, Val Loss: 2.033171, Val Accuracy: 33.0184%, Gap: -0.018399, LR: 0.000895
+Model saved to model.npz
+  → New best saved! Val: 33.02%
+Epoch 12, Train Loss: 2.005104, Train Accuracy: 31.1909%, Val Loss: 1.993312, Val Accuracy: 32.1233%, Gap: -0.009324, LR: 0.000886
+Epoch 13, Train Loss: 1.987800, Train Accuracy: 33.4659%, Val Loss: 1.988865, Val Accuracy: 33.7146%, Gap: -0.002486, LR: 0.000878
+Model saved to model.npz
+  → New best saved! Val: 33.71%
+Epoch 14, Train Loss: 1.971253, Train Accuracy: 32.5211%, Val Loss: 1.987612, Val Accuracy: 32.6703%, Gap: -0.001492, LR: 0.000869
+Epoch 15, Train Loss: 1.960312, Train Accuracy: 34.7464%, Val Loss: 1.951517, Val Accuracy: 33.9632%, Gap: 0.007832, LR: 0.000860
+Model saved to model.npz
+  → New best saved! Val: 33.96%
+Epoch 16, Train Loss: 1.944930, Train Accuracy: 35.6042%, Val Loss: 1.928882, Val Accuracy: 35.1069%, Gap: 0.004973, LR: 0.000851
+Model saved to model.npz
+  → New best saved! Val: 35.11%
+Epoch 17, Train Loss: 1.931497, Train Accuracy: 35.6166%, Val Loss: 1.913241, Val Accuracy: 36.4993%, Gap: -0.008826, LR: 0.000843
+Model saved to model.npz
+  → New best saved! Val: 36.50%
+Epoch 18, Train Loss: 1.917891, Train Accuracy: 33.4535%, Val Loss: 1.989474, Val Accuracy: 32.6703%, Gap: 0.007832, LR: 0.000835
+Epoch 19, Train Loss: 1.907537, Train Accuracy: 36.3874%, Val Loss: 1.916822, Val Accuracy: 34.5599%, Gap: 0.018274, LR: 0.000826
+Epoch 20, Train Loss: 1.890796, Train Accuracy: 35.7658%, Val Loss: 1.952863, Val Accuracy: 32.6703%, Gap: 0.030955, LR: 0.000818
+Epoch 21, Train Loss: 1.884700, Train Accuracy: 36.0517%, Val Loss: 1.937533, Val Accuracy: 33.6151%, Gap: 0.024366, LR: 0.000810
+Epoch 22, Train Loss: 1.875474, Train Accuracy: 37.2327%, Val Loss: 1.927324, Val Accuracy: 34.4107%, Gap: 0.028220, LR: 0.000802

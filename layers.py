@@ -274,3 +274,16 @@ class CrossEntropyLossLayer:
     
     def backward(self, prediction: np.ndarray, target: np.ndarray) -> np.ndarray:
         return prediction - target
+    
+class GlobalAvgPoolingLayer:
+    def __init__(self):
+        self.input_shape = None
+
+    def forward(self, input_data: np.ndarray) -> np.ndarray:
+        self.input_shape = input_data.shape
+        return input_data.mean(axis=(1, 2)).reshape(1, -1)
+    
+    def backward(self, output_gradient: np.ndarray) -> np.ndarray:
+        C, H, W = self.input_shape
+        return output_gradient.reshape(C, 1, 1) * \
+               np.ones(self.input_shape) / (H * W)

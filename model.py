@@ -12,7 +12,7 @@ class MyAI:
         self.relu2 = layers.ReLULayer()
         self.pool2 = layers.MaxPoolingLayer(2)
 
-        self.flatten = layers.FlattenLayer()
+        self.gap = layers.GlobalAvgPoolingLayer()
 
         # Fully Connected（Lazy Init）
         self.fc1 = layers.FullyConnectedLayer(None, 64)
@@ -30,7 +30,7 @@ class MyAI:
         x = self.relu2.forward(x)
         x = self.pool2.forward(x)
 
-        x = self.flatten.forward(x)
+        x = self.gap.forward(x)
 
         x = self.fc1.forward(x)
         x = self.fc_relu.forward(x)
@@ -48,7 +48,7 @@ class MyAI:
         grad = self.fc1.backward(grad)
     
 
-        grad = self.flatten.backward(grad)
+        grad = self.gap.backward(grad)
 
         grad = self.pool2.backward(grad)
         grad = self.relu2.backward(grad)
