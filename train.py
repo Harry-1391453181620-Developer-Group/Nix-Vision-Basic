@@ -8,25 +8,25 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train MyAI CNN")
 
     # Dataset
-    parser.add_argument("--dataset-path", type=str, required=True,      help="Path to dataset directory")
-    parser.add_argument("--num-classes",  type=int, default=None,       help="Number of classes to load (default: all)")
+    parser.add_argument("--dataset-path", type=str,                                      required=True, help="Path to dataset directory")
+    parser.add_argument("--num-classes",  type=int,                        default=None, required=True, help="Number of classes to load (default: all)")
 
-    # Epoch number
-    parser.add_argument("--epochs",    type=int,   default=40,          help="Number of epochs")
-
-    # Learning rate
-    parser.add_argument("--lr",        type=float, default=0.001,       help="Learning rate")
-    parser.add_argument("--lr-decay",  type=float, default=0.98,        help="LR decay per epoch")
+    # Epoch number         
+    parser.add_argument("--epochs",       type=int,                        default=40,   required=True, help="Number of epochs")
+            
+    # Learning rate                  
+    parser.add_argument("--lr",           type=float,                      default=0.001,               help="Learning rate")
+    parser.add_argument("--lr-decay",     type=float,                      default=0.98,                help="LR decay per epoch")
+    parser.add_argument("--l2-lambda",    type=float,                      default=0.0001,              help="L2 regularization strength")
     
-    # Saving
-    parser.add_argument("--saving",    action="store_true",             help="Enable model saving")
-    parser.add_argument("--no-saving", action="store_true",             help="Disable model saving")
-    parser.add_argument("--save-to",   type=str,   default="model.npz", help="Path to save model (only used with --saving)")
-
-    # Loading
-    parser.add_argument("--loading",   action="store_true",             help="Load model before training")
-    parser.add_argument("--no-loading",action="store_true",             help="Explicitly start fresh (default)")
-    parser.add_argument("--load-from", type=str,   default="model.npz", help="Path to load model from (only used with --loading)")
+    # Saving                    
+    parser.add_argument("--saving",                   action="store_true",                              help="Enable model saving")
+    parser.add_argument("--no-saving",                action="store_true",                              help="Disable model saving")
+    parser.add_argument("--save-to",      type=str,                        default="model.npz",         help="Path to save model (only used with --saving")
+    # Loading           
+    parser.add_argument("--loading",                  action="store_true",                              help="Load model before training")
+    parser.add_argument("--no-loading",               action="store_true",                              help="Explicitly start fresh (default)")
+    parser.add_argument("--load-from",    type=str,                        default="model.npz",         help="Path to load model from (only used with --loading)")
 
     return parser.parse_args()
 
@@ -58,8 +58,7 @@ def save_model(model, path="model.npz"):
 
         #FC
         fc1_weights=model.fc1.weights,
-        fc1_bias=model.fc1.bias,
-        fc2_weights=model.fc2.weights,
+        fc1_bias=model.fc1.bias,   
         fc2_bias=model.fc2.bias
     )
     print(f"Model saved to {path}")
@@ -82,7 +81,8 @@ def train(model,
           train_labels, 
           epochs=10, 
           lr=0.001, 
-          lr_decay=0.98, 
+          lr_decay=0.98,
+          l2_lambda=0.0001,
           save=True, 
           save_to="model.npz", 
           val_data=None, 
@@ -115,17 +115,7 @@ def train(model,
             model.backward(grad)
 
             # Update
-            model.update(current_lr)
-
-            # temp debug
-            if epoch == 0 and i < 5:
-                print(f"  pred={np.argmax(prediction)}, target={np.argmax(target)}, probs={prediction.round(3)}")
-            if epoch == 0 and i == len(train_data) - 1:
-                print(f"Conv1 grad: {np.abs(model.conv1.kernel_gradient).mean():.8f}")
-                print(f"Conv2 grad: {np.abs(model.conv2.kernel_gradient).mean():.8f}")
-                print(f"FC1 grad:   {np.abs(model.fc1.weights_gradient).mean():.8f}")
-                print(f"FC2 grad:   {np.abs(model.fc2.weights_gradient).mean():.8f}")
-            # temp debug end
+            model.update(current_lr, l2_lambda=l2_lambda)
 
         train_loss = total_loss / len(train_data)
         train_acc = evaluate(model, train_data, train_labels)
@@ -173,6 +163,7 @@ if __name__ == "__main__":
           epochs=args.epochs,
           lr=args.lr,
           lr_decay=args.lr_decay,
+          l2_lambda=args.l2_lambda,
           save=should_save,
           save_to=args.save_to,
           val_data=val_data,

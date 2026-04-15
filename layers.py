@@ -96,7 +96,9 @@ class ConvolutionLayer:
 
         return input_gradient
 
-    def momentum_update(self, learning_rate: float, momentum: float = 0.9):
+    def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+        self.kernel_gradient += l2_lambda * self.kernel_data
+
         self.kernel_velocity = momentum * self.kernel_velocity - learning_rate * self.kernel_gradient
         self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
 
@@ -182,7 +184,9 @@ class FullyConnectedLayer:
 
         return input_gradient
     
-    def momentum_update(self, learning_rate: float, momentum: float = 0.9):
+    def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+        self.weights_gradient += l2_lambda * self.weights
+
         self.weights_velocity = momentum * self.weights_velocity - learning_rate * self.weights_gradient
         self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
 

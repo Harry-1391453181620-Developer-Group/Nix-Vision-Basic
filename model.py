@@ -15,9 +15,9 @@ class MyAI:
         self.flatten = layers.FlattenLayer()
 
         # Fully Connected（Lazy Init）
-        self.fc1 = layers.FullyConnectedLayer(None, 128)
+        self.fc1 = layers.FullyConnectedLayer(None, 64)
         self.fc_relu = layers.ReLULayer()
-        self.fc2 = layers.FullyConnectedLayer(128, num_classes)
+        self.fc2 = layers.FullyConnectedLayer(64, num_classes)
 
         self.softmax = layers.SoftmaxLayer()
 
@@ -58,8 +58,8 @@ class MyAI:
         grad = self.relu1.backward(grad)
         grad = self.conv1.backward(grad)
 
-    def update(self, learning_rate: float, momentum: float = 0.9):
-        self.conv1.momentum_update(learning_rate, momentum)
-        self.conv2.momentum_update(learning_rate, momentum)
-        self.fc1.momentum_update(learning_rate, momentum)
-        self.fc2.momentum_update(learning_rate, momentum)
+    def update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+        self.conv1.momentum_update(learning_rate, momentum, l2_lambda)
+        self.conv2.momentum_update(learning_rate, momentum, l2_lambda)
+        self.fc1.momentum_update(learning_rate, momentum, l2_lambda)
+        self.fc2.momentum_update(learning_rate, momentum, l2_lambda)

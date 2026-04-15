@@ -1,1 +1,12 @@
-python train.py --dataset-path D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset --num-classes 13 --epochs 100 --lr 0.001 --lr-decay 0.99 --saving --no-loading
+$args = @(
+"--dataset-path", "D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset",
+"--num-classes", "13",
+"--epochs", "100",
+"--lr", "0.001",
+"--lr-decay", "0.99",
+"--l2-lambda", "0.0001"
+"--saving",
+"--no-loading"
+)
+
+python.exe train.py @args

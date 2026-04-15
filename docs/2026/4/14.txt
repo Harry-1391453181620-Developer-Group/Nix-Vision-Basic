@@ -1,0 +1,52 @@
+Things done:
+1.  Runned traning for 13 claases:  found gradient is back but overfitting is severe.
+2.  Fix:
+        1.  L2 regularization. 
+            Explanation of L2 regularization:
+                Before there is l2, the mmodel's goal is to minimize the loss.
+                So it will give a weight that is very large in order to minimize the difference.
+                That is basically memorizing the samples.
+
+                After l2 implemented, the model have to achieve another goal, that is to minimize the loss + l2_factor * sum(weights^2)
+                This will prevent large weights.
+    Implementation:
+        1.  Add --l2-lambda attribute to the train.py
+        2.  modify model.update() in model.py.
+        3.  modify layers.ConvolutionLayer.momentum_update(), layers.FullyConnectedLayer.momentum_update()
+3.  Runned many traning, overfitting was still very severe. Still finding possible error.
+
+Appendix:
+1.  PS D:\Programing_materials\Python\python_Projects\My_AI> python train.py --dataset-path D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset --num-classes 13 --epochs 100 --lr 0.001 --lr-decay 0.99 --saving --no-loading
+C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+Classes: ['airplane', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'man', 'maple_tree', 'motorcycle', 'mountain', 'mouse', 'mushroom']
+Train: 7423 samples, Val: 1856 samples
+Data shape: (9279, 64, 64)
+  pred=2, target=12, probs=[[0.078 0.037 0.666 0.    0.001 0.011 0.01  0.001 0.024 0.015 0.022 0.007
+  0.127]]
+  pred=12, target=10, probs=[[0.035 0.019 0.046 0.001 0.005 0.023 0.028 0.008 0.049 0.033 0.017 0.014
+  0.722]]
+  pred=12, target=3, probs=[[0.02  0.015 0.009 0.001 0.004 0.009 0.017 0.002 0.027 0.026 0.072 0.012
+  0.786]]
+  pred=12, target=3, probs=[[0.055 0.032 0.004 0.007 0.003 0.011 0.019 0.006 0.025 0.01  0.17  0.014
+  0.644]]
+  pred=10, target=5, probs=[[0.138 0.065 0.006 0.087 0.015 0.018 0.024 0.012 0.062 0.019 0.266 0.06
+  0.226]]
+Conv1 grad: 0.15075902
+Conv2 grad: 0.02591135
+FC1 grad:   0.00102984
+FC2 grad:   0.01049819
+Epoch 0, Train Loss: 2.264194, Train Accuracy: 32.8034%, Val Loss: 2.107022, Val Accuracy: 28.4483%, Gap: 0.043552, LR: 0.001000
+Model saved to model.npz
+  → New best saved! Val: 28.45%
+Epoch 1, Train Loss: 1.950978, Train Accuracy: 45.9248%, Val Loss: 1.919706, Val Accuracy: 36.5302%, Gap: 0.093947, LR: 0.000990
+Model saved to model.npz
+  → New best saved! Val: 36.53%
+Epoch 2, Train Loss: 1.693152, Train Accuracy: 55.8669%, Val Loss: 1.943968, Val Accuracy: 37.0690%, Gap: 0.187979, LR: 0.000980
+Model saved to model.npz
+  → New best saved! Val: 37.07%
+Epoch 3, Train Loss: 1.405515, Train Accuracy: 71.3997%, Val Loss: 2.009605, Val Accuracy: 37.2845%, Gap: 0.341152, LR: 0.000970
+Model saved to model.npz
+  → New best saved! Val: 37.28%
+Epoch 4, Train Loss: 1.036449, Train Accuracy: 82.4330%, Val Loss: 2.308775, Val Accuracy: 36.9612%, Gap: 0.454718, LR: 0.000961
+Epoch 5, Train Loss: 0.668654, Train Accuracy: 87.0403%, Val Loss: 2.849470, Val Accuracy: 34.5366%, Gap: 0.525036, LR: 0.000951
