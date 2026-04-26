@@ -1,7 +1,7 @@
 import numpy as np
 
 class ConvolutionLayer:
-    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int, num_channels: int=1):
+    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int, num_channels: int=1, algorithm: str="auto"):
         self.num_kernels = num_kernels
         self.kernel_x = kernel_x
         self.kernel_y = kernel_y
@@ -21,70 +21,48 @@ class ConvolutionLayer:
         self.input_cache = None
         self.col_cache = None # col cache for backward
 
-    def im2col(self, input_data: np.ndarray, kernel_x, kernel_y) -> np.ndarray:
-        """Turns input image array into flattened array, ready for @ with the kernels."""
+        # Convolution algorithm
+        self.algorithm = algorithm
 
-        input_channels, input_x, input_y = input_data.shape
-        output_x = input_x - kernel_x + 1
-        output_y = input_y - kernel_y + 1
+        # Winograd cache flag
+        self.wino_ready = False
 
-        #col (flattened array)
-        col = np.zeros((output_x * output_y, input_channels * kernel_x * kernel_y)) #Using zeros to setup
-        row_index = 0
-        for i in range(output_x):
-            for j in range(output_y):
-                region = input_data[:, i:i+kernel_x, j:j+kernel_y] # the region from original input that should be flattened 
-                flattened_region = region.flatten()
-                col[row_index] = flattened_region
-                row_index += 1
-        return col
-    
-    def col2im(self, col, input_shape, kernel_x, kernel_y):
-        input_channels, input_x, input_y = input_shape
-        output_x = input_x - kernel_x + 1
-        output_y = input_y - kernel_y + 1
-
-        input_gradient = np.zeros((input_channels, input_x, input_y))
-
-        row_index = 0
-        for i in range(output_x):
-            for j in range(output_y):
-                # reshape one row back
-                patch = col[row_index].reshape(input_channels, kernel_x, kernel_y)
-                #add reshaped stuff to corresponding region
-                input_gradient[:, i:i+kernel_x, j:j+kernel_y] += patch
-                row_index += 1
-        return input_gradient
-
-    def forward(self, input_data: np.ndarray) -> np.ndarray:
+    # GEMM (im2col)
+    def _forward_im2col(self, input_data: np.ndarray) -> np.ndarray:
+        """Packed im2col forward pass, ready to be used"""
         if input_data.ndim == 2:
             input_data = input_data[np.newaxis, :, :]
-
+        
         self.input_cache = input_data
 
         input_channels, input_x, input_y = input_data.shape
-        
-        # Security check
+
         if input_x < self.kernel_x or input_y < self.kernel_y:
             raise ValueError("Kernel size larger than input.")
         output_x = input_x - self.kernel_x + 1
         output_y = input_y - self.kernel_y + 1
 
-        col = self.im2col(input_data, self.kernel_x, self.kernel_y)
+        #col (flattened array)
+        col = np.zeros((output_x * output_y, input_channels * self.kernel_x * self.kernel_y)) #Using zeros to setup
+        row_index = 0
+        for i in range(output_x):
+            for j in range(output_y):
+                region = input_data[:, i:i+self.kernel_x, j:j+self.kernel_y] # the region from original input that should be flattened 
+                flattened_region = region.flatten()
+                col[row_index] = flattened_region
+                row_index += 1
 
-        #flatten the kernel
-        flattened_kernel = self.kernel_data.reshape(self.num_kernels, - 1)
+        flattened_kernel = self.kernel_data.reshape(self.num_kernels, -1)
 
-        #using @ instead of multiple for loops
         output = (flattened_kernel @ col.T) + self.bias_data.reshape(-1, 1)
         output = output.reshape(self.num_kernels, output_x, output_y)
-
         self.col_cache = col
         return output
     
-    def backward(self, output_gradient: np.ndarray) -> np.ndarray:
+    def _backward_col2im(self, output_gradient: np.ndarray) -> np.ndarray:
+        """Packed col2im backward pass, ready to be used"""
         K, output_x, output_y = output_gradient.shape
-
+        
         gradient_reshaped = output_gradient.reshape(self.num_kernels, -1)
         self.kernel_gradient = (gradient_reshaped @ self.col_cache).reshape(self.kernel_data.shape)
         self.bias_gradient = np.sum(gradient_reshaped, axis=1)
@@ -92,11 +70,129 @@ class ConvolutionLayer:
         kernel_matrix = self.kernel_data.reshape(self.num_kernels, -1)
         col_gradient = (kernel_matrix.T @ gradient_reshaped).T
 
-        input_gradient = self.col2im(col_gradient, self.input_cache.shape, self.kernel_x, self.kernel_y)
+        input_channels, input_x, input_y = self.input_cache.shape
+        input_gradient = np.zeros((input_channels, input_x, input_y))
+
+        row_index = 0
+        for i in range(output_x):
+            for j in range(output_y):
+                # reshape one row back
+                patch = col_gradient[row_index].reshape(input_channels, self.kernel_x, self.kernel_y)
+                #add reshaped stuff to corresponding region
+                input_gradient[:, i:i+self.kernel_x, j:j+self.kernel_y] += patch
+                row_index += 1
 
         return input_gradient
+    
+    # Winograd
+    def _init_winograd_matrices(self):
+        # Winograd F(2x2, 3x3) matrices
+        self.G = np.array([[1, 0, 0],
+                           [0.5, 0.5, 0.5],
+                           [0.5, -0.5, 0.5],
+                           [0, 0, 1]])
+
+        self.B = np.array([[1, 0, -1, 0],
+                           [0, 1, 1, 0],
+                           [0, -1, 1, 0],
+                           [0, 1, 0, -1]])
+
+        self.A = np.array([[1, 1, 1, 0],
+                           [0, 1, -1, -1]])
+        
+    def _transform_kernels_winograd(self):
+        G = self.G
+        GT = G.T
+
+        self.U = np.zeros((self.num_kernels, self.num_channels, 4, 4))
+
+        for k in range(self.num_kernels):
+            for c in range(self.num_channels):
+                self.U[k, c] = G @ self.kernel_data[k, c] @ GT
+
+        self.wino_ready = True
+
+    def _forward_winograd(self, input_data):
+        """Packed winograd forward pass, ready to be used VECTORIZED TO INCREASE SPEED"""
+        if input_data.ndim == 2:
+            input_data = input_data[np.newaxis, :, :]
+
+        C, H, W = input_data.shape
+
+        if (H - 2) % 2 != 0 or (W - 2) % 2 != 0:
+            return self._forward_im2col(input_data)  # Fallback to im2col if dimensions are not suitable for Winograd
+
+        self.input_cache = input_data
+        input_channels, input_x, input_y = input_data.shape
+        output_x = input_x - self.kernel_x + 1
+        output_y = input_y - self.kernel_y + 1
+
+        col = np.zeros((output_x * output_y, input_channels * self.kernel_x * self.kernel_y))
+        row_index = 0
+        for i in range(output_x):
+            for j in range(output_y):
+                region = input_data[:, i:i+self.kernel_x, j:j+self.kernel_y]
+                col[row_index] = region.flatten()
+                row_index += 1
+        
+        self.col_cache = col
+
+        out_x = H - 2
+        out_y = W - 2
+
+        xs = np.arange(0, out_x, 2)
+        ys = np.arange(0, out_y, 2)
+        T = len(xs) * len(ys)
+
+        tiles = np.empty((T, C, 4, 4), dtype=input_data.dtype)
+        t = 0
+        for i in xs:
+            for j in ys:
+                tiles[t] = input_data[:, i:i+4, j:j+4]
+                t += 1
+        V = np.einsum('ab,tcbj->tcaj', self.B, tiles) # left * B
+        V = np.einsum('tcai,ij->tcaj', V, self.B.T) # right * B.T
+
+        M = np.einsum('kcij,tcij->tkij', self.U, V) # U * V
+        Y = np.einsum('ab,tkbj->tkaj', self.A, M)
+        Y = np.einsum('tkai,ij->tkaj', Y, self.A.T)
+
+        output = np.zeros((self.num_kernels, out_x, out_y), dtype=input_data.dtype)
+
+        t = 0
+        for i in xs:
+            for j in ys:
+                output[:, i:i+2, j:j+2] = Y[t] + self.bias_data[:, None, None]
+                t += 1
+
+        return output
+
+    def forward(self, input_data: np.ndarray) -> np.ndarray:
+        """Only use packed methods"""
+        use_winograd = (
+            self.kernel_x == 3 and
+            self.kernel_y == 3 and 
+            self.algorithm in ["auto", "winograd"]
+        )
+
+        if use_winograd and not self.wino_ready:
+            self._init_winograd_matrices()
+            self._transform_kernels_winograd()
+
+        if use_winograd:
+            return self._forward_winograd(input_data)
+
+        return self._forward_im2col(input_data)
+    
+    def backward(self, output_gradient: np.ndarray) -> np.ndarray:
+        """Only col2im"""
+        return self._backward_col2im(output_gradient)
 
     def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+        if hasattr(self, 'U'):
+            del self.U
+        
+        self.wino_ready = False
         self.kernel_gradient += l2_lambda * self.kernel_data
 
         self.kernel_velocity = momentum * self.kernel_velocity - learning_rate * self.kernel_gradient

@@ -1,0 +1,4 @@
+Things done:
+1.  Finally add Winograd!! 
+2.  Update the structure of ConvolutionLayer: class ConvolutionLayer:   def _forward_winograd, def _forward_im2col, def _backward_col2im，are methods ready to use directly, they can pass by theirselves
+                                                                        def forwad only determines which algorithm to use，def backward uses only _backward_col2im. momentum_update no change.
