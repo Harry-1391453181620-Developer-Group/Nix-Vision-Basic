@@ -63,3 +63,6 @@ class MyAI:
         self.conv2.momentum_update(learning_rate, momentum, l2_lambda)
         self.fc1.momentum_update(learning_rate, momentum, l2_lambda)
         self.fc2.momentum_update(learning_rate, momentum, l2_lambda)
+
+    def predict(self, x):
+        return self.forward(x)

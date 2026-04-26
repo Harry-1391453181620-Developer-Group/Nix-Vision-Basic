@@ -8,30 +8,30 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train MyAI CNN")
 
     # Dataset
-    parser.add_argument("--dataset-path", type=str,                                      required=True, help="Path to dataset directory")
-    parser.add_argument("--num-classes",  type=int,                        default=None, required=True, help="Number of classes to load (default: all)")
+    parser.add_argument("--dataset-path", type=str,                                             required=True, help="Path to dataset directory")
+    parser.add_argument("--num-classes",  type=int,                        default=None,                       help="Number of classes to load (default: all)")
 
     # Epoch number         
-    parser.add_argument("--epochs",       type=int,                        default=40,   required=True, help="Number of epochs")
+    parser.add_argument("--epochs",       type=int,                        default=40,                         help="Number of epochs")
             
     # Learning rate                  
-    parser.add_argument("--lr",           type=float,                      default=0.001,               help="Learning rate")
-    parser.add_argument("--lr-decay",     type=float,                      default=0.98,                help="LR decay per epoch")
-    parser.add_argument("--l2-lambda",    type=float,                      default=0.0001,              help="L2 regularization strength")
+    parser.add_argument("--lr",           type=float,                      default=0.001,                      help="Learning rate")
+    parser.add_argument("--lr-decay",     type=float,                      default=0.98,                       help="LR decay per epoch")
+    parser.add_argument("--l2-lambda",    type=float,                      default=0.0001,                     help="L2 regularization strength")
     
     # Saving                    
-    parser.add_argument("--saving",                   action="store_true",                              help="Enable model saving")
-    parser.add_argument("--no-saving",                action="store_true",                              help="Disable model saving")
-    parser.add_argument("--save-to",      type=str,                        default="model.npz",         help="Path to save model (only used with --saving")
+    parser.add_argument("--saving",                   action="store_true",                                     help="Enable model saving")
+    parser.add_argument("--no-saving",                action="store_true",                                     help="Disable model saving")
+    parser.add_argument("--save-to",      type=str,                        default="model.npz",                help="Path to save model (only used with --saving")
     # Loading           
-    parser.add_argument("--loading",                  action="store_true",                              help="Load model before training")
-    parser.add_argument("--no-loading",               action="store_true",                              help="Explicitly start fresh (default)")
-    parser.add_argument("--load-from",    type=str,                        default="model.npz",         help="Path to load model from (only used with --loading)")
+    parser.add_argument("--loading",                  action="store_true",                                     help="Load model before training")
+    parser.add_argument("--no-loading",               action="store_true",                                     help="Explicitly start fresh (default)")
+    parser.add_argument("--load-from",    type=str,                        default="model.npz",                help="Path to load model from (only used with --loading)")
 
     return parser.parse_args()
 
 def predict(model, x):
-    return model.forward(x)
+    return model.predict(x)
 
 def split_data(data, labels, val_ratio=0.2):
     indices = np.random.permutation(len(data))
@@ -58,7 +58,8 @@ def save_model(model, path="model.npz"):
 
         #FC
         fc1_weights=model.fc1.weights,
-        fc1_bias=model.fc1.bias,   
+        fc1_bias=model.fc1.bias,
+        fc2_weights=model.fc2.weights,   
         fc2_bias=model.fc2.bias
     )
     print(f"Model saved to {path}")
@@ -76,6 +77,14 @@ def load_model(model, path="model.npz"):
     print(f"Model loaded from {path}")
     return model
 
+def evaluate(model, data, labels):
+    correct = 0
+    for i in range(len(data)):
+        pred = model.predict(data[i])
+        if np.argmax(pred) == np.argmax(labels[i]):
+            correct += 1
+    return correct / len(data)
+
 def train(model, 
           train_data, 
           train_labels, 
@@ -87,6 +96,7 @@ def train(model,
           save_to="model.npz", 
           val_data=None, 
           val_labels=None):
+    
     loss_fn = layers.CrossEntropyLossLayer()
     current_lr = lr
     best_val_acc = 0.0
@@ -96,37 +106,35 @@ def train(model,
         
         #Shuffle
         indices = np.random.permutation(len(train_data))
-        train_data = train_data[indices]
-        train_labels = train_labels[indices]
+        for idx in indices:
+            input_data = train_data[idx]
+            target = train_labels[idx].reshape(1, -1)
 
-        for i in range(len(train_data)):
-            input_data = train_data[i]
-            target = train_labels[i].reshape(1, -1)
-
-            # Forward
-            prediction = model.forward(input_data)
-
-            # Loss
+            prediction = model.predict(input_data)
             loss = loss_fn.forward(prediction, target)
             total_loss += loss
 
-            # Backward
             grad = loss_fn.backward(prediction, target)
             model.backward(grad)
 
-            # Update
             model.update(current_lr, l2_lambda=l2_lambda)
-
+        
         train_loss = total_loss / len(train_data)
         train_acc = evaluate(model, train_data, train_labels)
         
         if val_data is not None:
-            val_total_loss = 0
+            val_loss = 0
+            correct = 0
+
             for i in range(len(val_data)):
                 pred = model.forward(val_data[i])
-                val_total_loss += loss_fn.forward(pred, val_labels[i].reshape(1, -1))
-            val_loss = val_total_loss / len(val_data)
-            val_acc = evaluate(model, val_data, val_labels)
+                val_loss += loss_fn.forward(pred, val_labels[i].reshape(1, -1))
+
+                if np.argmax(pred) == np.argmax(val_labels[i]):
+                    correct += 1
+
+            val_loss /= len(val_data)
+            val_acc = correct / len(val_data)
 
             gap = train_acc - val_acc
             print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Train Accuracy: {train_acc:.4%}, Val Loss: {val_loss:.6f}, Val Accuracy: {val_acc:.4%}, Gap: {gap:.6f}, LR: {current_lr:.6f}")

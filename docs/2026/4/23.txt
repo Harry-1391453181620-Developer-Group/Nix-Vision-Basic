@@ -1,0 +1,11 @@
+Things done:
+1.  The traning in 2026/4/13 was healthy, 100 epoch is able to run.
+2.  Fix errors: 
+    1.  save model lost fc2.weights
+    2.  argparse design not very good
+    3.  lost "," in train_commands
+    Improved:
+    1.  use model.predict(), prepare for future batchnorm, pred/eval
+    2.  add train.py.evaluate()
+    3.  val/train data split only one time during the whole training instead of every epoch
+2.  Before implementing 1, lets add winograd algorithm inspired from Pytorch. (Not finished)
