@@ -1,14 +1,15 @@
 import layers
+import numpy as np
 
 
 class MyAI:
     def __init__(self, num_classes: int):
         # CNN Structure
-        self.conv1 = layers.ConvolutionLayer(num_kernels=8, num_channels=1, kernel_x=3, kernel_y=3)
+        self.conv1 = layers.ConvolutionLayer(num_kernels=16, num_channels=1, kernel_x=3, kernel_y=3, algorithm="im2col")
         self.relu1 = layers.ReLULayer()
         self.pool1 = layers.MaxPoolingLayer(2)
 
-        self.conv2 = layers.ConvolutionLayer(num_kernels=16, num_channels=8, kernel_x=3, kernel_y=3)
+        self.conv2 = layers.ConvolutionLayer(num_kernels=3244, num_channels=8, kernel_x=3, kernel_y=3, algorithm="im2col")
         self.relu2 = layers.ReLULayer()
         self.pool2 = layers.MaxPoolingLayer(2)
 
@@ -66,3 +67,15 @@ class MyAI:
 
     def predict(self, x):
         return self.forward(x)
+    
+    def load_model(self, path="model.npz"):
+        d = np.load(path)
+        self.conv1.kernel_data = d["conv1_kernels"]
+        self.conv1.bias_data   = d["conv1_bias"]
+        self.conv2.kernel_data = d["conv2_kernels"]
+        self.conv2.bias_data   = d["conv2_bias"]
+        self.fc1.weights = d["fc1_weights"]
+        self.fc1.bias    = d["fc1_bias"]
+        self.fc2.weights = d["fc2_weights"]
+        self.fc2.bias    = d["fc2_bias"]
+        print(f"Model loaded from {path}")

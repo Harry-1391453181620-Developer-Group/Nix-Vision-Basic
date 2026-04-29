@@ -84,7 +84,7 @@ class ConvolutionLayer:
 
         return input_gradient
     
-    # Winograd
+    # Winogradx
     def _init_winograd_matrices(self):
         # Winograd F(2x2, 3x3) matrices
         self.G = np.array([[1, 0, 0],
@@ -134,7 +134,7 @@ class ConvolutionLayer:
                 region = input_data[:, i:i+self.kernel_x, j:j+self.kernel_y]
                 col[row_index] = region.flatten()
                 row_index += 1
-        
+
         self.col_cache = col
 
         out_x = H - 2
@@ -336,8 +336,10 @@ class MaxPoolingLayer:
                         j * self.pool_size + max_index[1]
                     ] = output_gradient[k, i, j]
         return input_gradient
-    
+
+# Depreciated FlattenLayer, not used, replaced by GlobalAvgPoolingLayer
 class FlattenLayer:
+    """DEPRECIATED"""
     def __init__(self):
         self.original_shape = None
 
