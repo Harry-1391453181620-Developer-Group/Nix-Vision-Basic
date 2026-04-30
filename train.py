@@ -77,14 +77,6 @@ def load_model(model, path="model.npz"):
     print(f"Model loaded from {path}")
     return model
 
-def evaluate(model, data, labels):
-    correct = 0
-    for i in range(len(data)):
-        pred = model.predict(data[i])
-        if np.argmax(pred) == np.argmax(labels[i]):
-            correct += 1
-    return correct / len(data)
-
 def train(model, 
           train_data, 
           train_labels, 
@@ -102,6 +94,7 @@ def train(model,
     best_val_acc = 0.0
 
     for epoch in range(epochs):
+        model.dropout.train()
         total_loss = 0
         
         #Shuffle
@@ -123,6 +116,7 @@ def train(model,
         train_acc = evaluate(model, train_data, train_labels)
         
         if val_data is not None:
+            model.dropout.eval()
             val_loss = 0
             correct = 0
 

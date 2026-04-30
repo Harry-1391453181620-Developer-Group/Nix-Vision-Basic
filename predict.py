@@ -1,12 +1,25 @@
 import numpy as np
 from PIL import Image
 from model import MyAI
-from layers import ConvolutionLayer
+from layers import *
+
+def load_model(model, path="model.npz"):
+        d = np.load(path)
+        model.conv1.kernel_data = d["conv1_kernels"]
+        model.conv1.bias_data   = d["conv1_bias"]
+        model.conv2.kernel_data = d["conv2_kernels"]
+        model.conv2.bias_data   = d["conv2_bias"]
+        model.fc1.weights = d["fc1_weights"]
+        model.fc1.bias    = d["fc1_bias"]
+        model.fc2.weights = d["fc2_weights"]
+        model.fc2.bias    = d["fc2_bias"]
+        print(f"Model loaded from {path}")
 
 def load_image(path):
     img = Image.open(path).convert("L")  # Convert to grayscale
     img = img.resize((64, 64))  # Resize to 64x64
     img_array = np.array(img) / 255.0  # Normalize to [0, 1]
+    img_array = img_array[np.newaxis, :, :]  # Add batch and channel dimensions
     return img_array
 
 def enable_winograd(model):
@@ -17,18 +30,18 @@ def enable_winograd(model):
     model.conv2.wino_ready = False
 
 def predict(model, image):
+    model.dropout.eval()
     output = model.forward(image)
     return np.argmax(output)
 
 if __name__ == "__main__":
     model = MyAI(num_classes=13)
 
-    model.load_model("model.npz")
+    load_model(model, "model.npz")
     enable_winograd(model)
 
     img = load_image("image.png")
-    pred_class = model.predict(img)
+    pred_class = predict(model, img)
 
-    pred = np.argmax(pred_class)
-    print(f"Predicted class: {pred}")
+    print(f"Predicted class: {pred_class}")
             

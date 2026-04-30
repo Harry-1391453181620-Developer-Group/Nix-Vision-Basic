@@ -27,6 +27,9 @@ class ConvolutionLayer:
         # Winograd cache flag
         self.wino_ready = False
 
+        # train/eval mode flag
+        self.training = True
+
     # GEMM (im2col)
     def _forward_im2col(self, input_data: np.ndarray) -> np.ndarray:
         """Packed im2col forward pass, ready to be used"""
@@ -84,7 +87,7 @@ class ConvolutionLayer:
 
         return input_gradient
     
-    # Winogradx
+    # Winograd
     def _init_winograd_matrices(self):
         # Winograd F(2x2, 3x3) matrices
         self.G = np.array([[1, 0, 0],
@@ -200,6 +203,12 @@ class ConvolutionLayer:
 
         self.kernel_data += self.kernel_velocity
         self.bias_data += self.bias_velocity
+
+    def train(self):
+        self.training = True
+    
+    def eval(self):
+        self.training = False
 
 class ReLULayer:
     def __init__(self):
@@ -385,3 +394,29 @@ class GlobalAvgPoolingLayer:
         C, H, W = self.input_shape
         return output_gradient.reshape(C, 1, 1) * \
                np.ones(self.input_shape) / (H * W)
+    
+
+class DropoutLayer:
+    def  __init__(self, dropout_prob: float=0.5):
+        self.dropout_prob = dropout_prob
+        self.mask = None
+        self.training = True
+
+    def forward(self, input_data: np.ndarray) -> np.ndarray:
+        if self.training:
+            self.mask = (np.random.rand(*input_data.shape) >= self.dropout_prob).astype(float)
+            return input_data * self.mask / (1.0 - self.dropout_prob)
+        else:
+            return input_data
+    
+    def backward(self, gradient_output: np.ndarray) -> np.ndarray:
+        if self.training and self.mask is not None:
+            return gradient_output * self.mask / (1.0 - self.dropout_prob)
+        else:
+            return gradient_output
+        
+    def train(self):
+        self.training = True
+
+    def eval(self):
+        self.training = False
