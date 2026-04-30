@@ -103,7 +103,7 @@ def train(model,
             input_data = train_data[idx]
             target = train_labels[idx].reshape(1, -1)
 
-            prediction = model.predict(input_data)
+            prediction = model.forward(input_data)
             loss = loss_fn.forward(prediction, target)
             total_loss += loss
 
