@@ -3,13 +3,13 @@ import numpy as np
 
 
 class MyAI:
-    def __init__(self, num_classes: int):
+    def __init__(self, num_classes: int, dropout_prob: float = 0.3):
         # CNN Structure
-        self.conv1 = layers.ConvolutionLayer(num_kernels=16, num_channels=1, kernel_x=3, kernel_y=3, algorithm="im2col")
+        self.conv1 = layers.ConvolutionLayer(num_kernels=32, num_channels=1, kernel_x=3, kernel_y=3, algorithm="im2col")
         self.relu1 = layers.ReLULayer()
         self.pool1 = layers.MaxPoolingLayer(2)
 
-        self.conv2 = layers.ConvolutionLayer(num_kernels=32, num_channels=16, kernel_x=3, kernel_y=3, algorithm="im2col")
+        self.conv2 = layers.ConvolutionLayer(num_kernels=32, num_channels=32, kernel_x=3, kernel_y=3, algorithm="im2col")
         self.relu2 = layers.ReLULayer()
         self.pool2 = layers.MaxPoolingLayer(2)
 
@@ -18,7 +18,7 @@ class MyAI:
         # Fully Connected（Lazy Init）
         self.fc1 = layers.FullyConnectedLayer(None, 64)
         self.fc_relu = layers.ReLULayer()
-        self.dropout = layers.DropoutLayer(0.5)
+        self.dropout = layers.DropoutLayer(dropout_prob)
         self.fc2 = layers.FullyConnectedLayer(64, num_classes)
 
         self.softmax = layers.SoftmaxLayer()

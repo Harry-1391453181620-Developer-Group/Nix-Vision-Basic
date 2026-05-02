@@ -28,6 +28,8 @@ def parse_args():
     parser.add_argument("--no-loading",               action="store_true",                                     help="Explicitly start fresh (default)")
     parser.add_argument("--load-from",    type=str,                        default="model.npz",                help="Path to load model from (only used with --loading)")
 
+    # Dropout
+    parser.add_argument("--dropout-prob", type=float,                      default=0.3,                        help="Dropout probability (default: 0.3)")
     return parser.parse_args()
 
 def predict(model, x):
@@ -113,7 +115,9 @@ def train(model,
             model.update(current_lr, l2_lambda=l2_lambda)
         
         train_loss = total_loss / len(train_data)
+        model.dropout.eval()
         train_acc = evaluate(model, train_data, train_labels)
+        model.dropout.train()
         
         if val_data is not None:
             model.dropout.eval()
@@ -154,7 +158,7 @@ if __name__ == "__main__":
     print(f"Train: {len(train_data)} samples, Val: {len(val_data)} samples")
     print("Data shape:", data.shape)
     
-    model = MyAI(num_classes=len(class_names))
+    model = MyAI(num_classes=len(class_names), dropout_prob=args.dropout_prob)
 
     if args.loading and not args.no_loading:
         model.forward(data[0])
