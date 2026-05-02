@@ -31,7 +31,7 @@ def parse_args():
     return parser.parse_args()
 
 def predict(model, x):
-    return model.predict(x)
+    return model.forward(x)
 
 def split_data(data, labels, val_ratio=0.2):
     indices = np.random.permutation(len(data))
