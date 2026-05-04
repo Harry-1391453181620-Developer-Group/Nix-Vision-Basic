@@ -9,7 +9,7 @@ class MyAI:
         self.relu1 = layers.ReLULayer()
         self.pool1 = layers.MaxPoolingLayer(2)
 
-        self.conv2 = layers.ConvolutionLayer(num_kernels=32, num_channels=32, kernel_x=3, kernel_y=3, algorithm="im2col")
+        self.conv2 = layers.ConvolutionLayer(num_kernels=64, num_channels=32, kernel_x=3, kernel_y=3, algorithm="im2col")
         self.relu2 = layers.ReLULayer()
         self.pool2 = layers.MaxPoolingLayer(2)
 

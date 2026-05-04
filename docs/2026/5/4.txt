@@ -1,0 +1,88 @@
+Things done:
+1.  Finished training: Batter than previous, but model is still too small.
+2.  Fix： turn Conv2 into 64 kernels.
+
+Appendix: 
+1.  Training output: PS D:\Programing_materials\Python\python_Projects\My_AI> $args = @(
+>> "--dataset-path", "D:\Programing_materials\Python\python_Projects\Image_Identify_CNN\Dataset",
+>> "--num-classes", "13",
+>> "--epochs", "100",
+>> "--lr", "0.002",
+>> "--lr-decay", "0.995",
+>> "--l2-lambda", "0.0001",
+>> "--saving",
+>> "--no-loading",
+>> "--dropout-prob", "0.3"
+>> )
+>> 
+>> python.exe train.py @args
+C:\Users\Lenovo\AppData\Roaming\Python\Python313\site-packages\PIL\Image.py:1039: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+Classes: ['airplane', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'man', 'maple_tree', 'motorcycle', 'mountain', 'mouse', 'mushroom']
+Train: 13848 samples, Val: 3463 samples
+Data shape: (17311, 64, 64)
+Epoch 0, Train Loss: 2.510887, Train Accuracy: 12.6516%, Val Loss: 2.459046, Val Accuracy: 13.1100%, Gap: -0.004584, LR: 0.002000
+Model saved to model.npz
+  → New best saved! Val: 13.11%
+Epoch 1, Train Loss: 2.437504, Train Accuracy: 18.1398%, Val Loss: 2.440397, Val Accuracy: 17.7303%, Gap: 0.004095, LR: 0.001990
+Model saved to model.npz
+  → New best saved! Val: 17.73%
+Epoch 2, Train Loss: 2.340303, Train Accuracy: 24.2851%, Val Loss: 2.245213, Val Accuracy: 25.3537%, Gap: -0.010686, LR: 0.001980
+Model saved to model.npz
+  → New best saved! Val: 25.35%
+Epoch 3, Train Loss: 2.285944, Train Accuracy: 25.3683%, Val Loss: 2.211438, Val Accuracy: 26.3355%, Gap: -0.009673, LR: 0.001970
+Model saved to model.npz
+  → New best saved! Val: 26.34%
+Epoch 4, Train Loss: 2.247907, Train Accuracy: 23.0719%, Val Loss: 2.203319, Val Accuracy: 22.6393%, Gap: 0.004326, LR: 0.001960
+Epoch 5, Train Loss: 2.201737, Train Accuracy: 30.2860%, Val Loss: 2.085459, Val Accuracy: 30.7537%, Gap: -0.004677, LR: 0.001950
+Model saved to model.npz
+  → New best saved! Val: 30.75%
+Epoch 6, Train Loss: 2.153072, Train Accuracy: 31.4702%, Val Loss: 2.048088, Val Accuracy: 32.3708%, Gap: -0.009005, LR: 0.001941
+Model saved to model.npz
+  → New best saved! Val: 32.37%
+Epoch 7, Train Loss: 2.122396, Train Accuracy: 32.4740%, Val Loss: 2.019246, Val Accuracy: 32.4574%, Gap: 0.000166, LR: 0.001931
+Model saved to model.npz
+  → New best saved! Val: 32.46%
+Epoch 8, Train Loss: 2.090916, Train Accuracy: 33.4633%, Val Loss: 1.991627, Val Accuracy: 34.2478%, Gap: -0.007844, LR: 0.001921
+Model saved to model.npz
+  → New best saved! Val: 34.25%
+Epoch 9, Train Loss: 2.061283, Train Accuracy: 32.5246%, Val Loss: 1.995836, Val Accuracy: 32.7173%, Gap: -0.001927, LR: 0.001912
+Epoch 10, Train Loss: 2.048606, Train Accuracy: 36.2507%, Val Loss: 1.934043, Val Accuracy: 35.4895%, Gap: 0.007613, LR: 0.001902
+Model saved to model.npz
+  → New best saved! Val: 35.49%
+Epoch 11, Train Loss: 2.025608, Train Accuracy: 35.5430%, Val Loss: 1.940010, Val Accuracy: 34.4210%, Gap: 0.011220, LR: 0.001893
+Epoch 12, Train Loss: 1.992849, Train Accuracy: 37.5794%, Val Loss: 1.902776, Val Accuracy: 36.7600%, Gap: 0.008194, LR: 0.001883
+Model saved to model.npz
+  → New best saved! Val: 36.76%
+Epoch 13, Train Loss: 1.974839, Train Accuracy: 36.8429%, Val Loss: 1.907376, Val Accuracy: 37.3087%, Gap: -0.004658, LR: 0.001874
+Model saved to model.npz
+  → New best saved! Val: 37.31%
+Epoch 14, Train Loss: 1.949415, Train Accuracy: 38.8720%, Val Loss: 1.884106, Val Accuracy: 37.5686%, Gap: 0.013035, LR: 0.001864
+Model saved to model.npz
+  → New best saved! Val: 37.57%
+Epoch 15, Train Loss: 1.940141, Train Accuracy: 37.5939%, Val Loss: 1.887807, Val Accuracy: 37.2798%, Gap: 0.003141, LR: 0.001855
+Epoch 16, Train Loss: 1.922454, Train Accuracy: 41.0456%, Val Loss: 1.801642, Val Accuracy: 39.5033%, Gap: 0.015423, LR: 0.001846
+Model saved to model.npz
+  → New best saved! Val: 39.50%
+Epoch 17, Train Loss: 1.905330, Train Accuracy: 39.0742%, Val Loss: 1.851782, Val Accuracy: 38.0017%, Gap: 0.010725, LR: 0.001837
+Epoch 18, Train Loss: 1.885016, Train Accuracy: 39.7819%, Val Loss: 1.817658, Val Accuracy: 38.3771%, Gap: 0.014048, LR: 0.001827
+Epoch 19, Train Loss: 1.883761, Train Accuracy: 40.5040%, Val Loss: 1.819715, Val Accuracy: 39.3589%, Gap: 0.011451, LR: 0.001818
+Epoch 20, Train Loss: 1.870715, Train Accuracy: 42.1938%, Val Loss: 1.790605, Val Accuracy: 39.9365%, Gap: 0.022573, LR: 0.001809
+Model saved to model.npz
+  → New best saved! Val: 39.94%
+Epoch 21, Train Loss: 1.849949, Train Accuracy: 38.6482%, Val Loss: 1.869233, Val Accuracy: 37.3664%, Gap: 0.012817, LR: 0.001800
+Epoch 22, Train Loss: 1.843676, Train Accuracy: 40.1791%, Val Loss: 1.827542, Val Accuracy: 39.4744%, Gap: 0.007046, LR: 0.001791
+Epoch 23, Train Loss: 1.838171, Train Accuracy: 41.1467%, Val Loss: 1.795590, Val Accuracy: 40.4563%, Gap: 0.006905, LR: 0.001782
+Model saved to model.npz
+  → New best saved! Val: 40.46%
+Epoch 24, Train Loss: 1.823408, Train Accuracy: 43.9414%, Val Loss: 1.727967, Val Accuracy: 42.4776%, Gap: 0.014637, LR: 0.001773
+Model saved to model.npz
+  → New best saved! Val: 42.48%
+Epoch 25, Train Loss: 1.817505, Train Accuracy: 43.8403%, Val Loss: 1.746214, Val Accuracy: 41.9867%, Gap: 0.018535, LR: 0.001764
+Epoch 26, Train Loss: 1.804911, Train Accuracy: 42.8654%, Val Loss: 1.773899, Val Accuracy: 40.9183%, Gap: 0.019471, LR: 0.001756
+Epoch 27, Train Loss: 1.801424, Train Accuracy: 44.6635%, Val Loss: 1.713191, Val Accuracy: 44.2969%, Gap: 0.003666, LR: 0.001747
+Model saved to model.npz
+  → New best saved! Val: 44.30%
+Epoch 28, Train Loss: 1.789364, Train Accuracy: 41.6522%, Val Loss: 1.831785, Val Accuracy: 40.3119%, Gap: 0.013404, LR: 0.001738
+Epoch 29, Train Loss: 1.779104, Train Accuracy: 44.0352%, Val Loss: 1.730797, Val Accuracy: 41.9290%, Gap: 0.021063, LR: 0.001729
+Epoch 30, Train Loss: 1.768790, Train Accuracy: 43.9558%, Val Loss: 1.723264, Val Accuracy: 42.8819%, Gap: 0.010739, LR: 0.001721
