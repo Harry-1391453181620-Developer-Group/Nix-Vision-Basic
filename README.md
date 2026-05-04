@@ -75,3 +75,16 @@ predict.py
 -   A 13-class dataset
 
 ------------------------------------------------------------------------
+
+## Project Roadmap
+
+This project is part of a larger system called **Nix**, a future Mixture-of-Experts (MoE) AI architecture.
+
+### Vision branch:
+- **Nix-Vision-Basic** (this repo)  
+  → A from-scratch CNN built with NumPy for learning and experimentation  
+
+- **Nix-Vision-Pro** (coming soon)  
+  → A more advanced vision model with improved architecture and performance  
+
+In the future, both will serve as **Vision Experts** inside the Nix MoE model (Not started yet) or integrate fully using more complex neurons in Nix instead of MoE.
