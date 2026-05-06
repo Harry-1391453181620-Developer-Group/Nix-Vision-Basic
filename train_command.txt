@@ -6,7 +6,7 @@ $args = @(
 "--lr-decay", "0.997",
 "--l2-lambda", "0.0001",
 "--saving",
-"--no-31loading",
+"--no-loading",
 "--dropout-prob", "0.25"
 )
 
