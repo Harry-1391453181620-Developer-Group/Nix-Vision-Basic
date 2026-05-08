@@ -57,6 +57,8 @@ def save_model(model, path="model.npz"):
         conv1_bias=model.conv1.bias_data,
         conv2_kernels=model.conv2.kernel_data,
         conv2_bias=model.conv2.bias_data,
+        conv3_kernels=model.conv3.kernel_data,
+        conv3_bias=model.conv3.bias_data,
 
         #FC
         fc1_weights=model.fc1.weights,
@@ -72,6 +74,8 @@ def load_model(model, path="model.npz"):
     model.conv1.bias_data   = d["conv1_bias"]
     model.conv2.kernel_data = d["conv2_kernels"]
     model.conv2.bias_data   = d["conv2_bias"]
+    model.conv3.kernel_data = d["conv3_kernels"]
+    model.conv3.bias_data   = d["conv3_bias"]
     model.fc1.weights = d["fc1_weights"]
     model.fc1.bias    = d["fc1_bias"]
     model.fc2.weights = d["fc2_weights"]

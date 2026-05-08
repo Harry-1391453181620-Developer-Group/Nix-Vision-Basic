@@ -9,6 +9,8 @@ def load_model(model, path="model.npz"):
         model.conv1.bias_data   = d["conv1_bias"]
         model.conv2.kernel_data = d["conv2_kernels"]
         model.conv2.bias_data   = d["conv2_bias"]
+        model.conv3.kernel_data = d["conv3_kernels"]
+        model.conv3.bias_data   = d["conv3_bias"]
         model.fc1.weights = d["fc1_weights"]
         model.fc1.bias    = d["fc1_bias"]
         model.fc2.weights = d["fc2_weights"]
@@ -25,9 +27,11 @@ def load_image(path):
 def enable_winograd(model):
     model.conv1.algorithm = "winograd"
     model.conv2.algorithm = "winograd"
+    model.conv3.algorithm = "winograd"
 
     model.conv1.wino_ready = False
     model.conv2.wino_ready = False
+    model.conv3.wino_ready = False
 
 def predict(model, image):
     model.dropout.eval()

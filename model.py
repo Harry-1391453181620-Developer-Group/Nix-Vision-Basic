@@ -13,13 +13,17 @@ class MyAI:
         self.relu2 = layers.ReLULayer()
         self.pool2 = layers.MaxPoolingLayer(2)
 
+        self.conv3 = layers.ConvolutionLayer(num_kernels=64, num_channels=64, kernel_x=3, kernel_y=3, algorithm="im2col")
+        self.relu3 = layers.ReLULayer()
+        self.pool3 = layers.MaxPoolingLayer(2)
+
         self.gap = layers.GlobalAvgPoolingLayer()
 
         # Fully Connected（Lazy Init）
-        self.fc1 = layers.FullyConnectedLayer(None, 64)
+        self.fc1 = layers.FullyConnectedLayer(None, 128)
         self.fc_relu = layers.ReLULayer()
         self.dropout = layers.DropoutLayer(dropout_prob)
-        self.fc2 = layers.FullyConnectedLayer(64, num_classes)
+        self.fc2 = layers.FullyConnectedLayer(128, num_classes)
 
         self.softmax = layers.SoftmaxLayer()
 
@@ -31,6 +35,10 @@ class MyAI:
         x = self.conv2.forward(x)
         x = self.relu2.forward(x)
         x = self.pool2.forward(x)
+
+        x = self.conv3.forward(x)
+        x = self.relu3.forward(x)
+        x = self.pool3.forward(x)
 
         x = self.gap.forward(x)
 
@@ -54,6 +62,10 @@ class MyAI:
 
         grad = self.gap.backward(grad)
 
+        grad = self.pool3.backward(grad)
+        grad = self.relu3.backward(grad)
+        grad = self.conv3.backward(grad)
+
         grad = self.pool2.backward(grad)
         grad = self.relu2.backward(grad)
         grad = self.conv2.backward(grad)
@@ -65,5 +77,6 @@ class MyAI:
     def update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
         self.conv1.momentum_update(learning_rate, momentum, l2_lambda)
         self.conv2.momentum_update(learning_rate, momentum, l2_lambda)
+        self.conv3.momentum_update(learning_rate, momentum, l2_lambda)
         self.fc1.momentum_update(learning_rate, momentum, l2_lambda)
         self.fc2.momentum_update(learning_rate, momentum, l2_lambda)
