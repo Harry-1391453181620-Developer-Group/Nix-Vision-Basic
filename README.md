@@ -22,6 +22,7 @@ motorcycle, mountain, mouse, mushroom
 Input (1×64×64)\
 → Conv (32) + ReLU + MaxPool\
 → Conv (64) + ReLU + MaxPool\
+→ Conv (64) + ReLU + MaxPool\
 → Global Average Pooling\
 → Fully Connected (64)\
 → Dropout\
