@@ -34,11 +34,11 @@ class ConvolutionLayer:
     def _forward_im2col(self, input_data: np.ndarray) -> np.ndarray:
         """Packed im2col forward pass, ready to be used"""
         if input_data.ndim == 2:
-            input_data = input_data[np.newaxis, :, :]
-        
-        self.input_cache = input_data
+            input_data = input_data[np.newaxis, np.newaxis, :, :]
+        elif input_data.ndim == 3:
+            input_data = input_data[np.newaxis, :, :, :]
 
-        input_channels, input_x, input_y = input_data.shape
+        input_batch_num, input_channels, input_x, input_y = input_data.shape
 
         if input_x < self.kernel_x or input_y < self.kernel_y:
             raise ValueError("Kernel size larger than input.")
@@ -46,27 +46,32 @@ class ConvolutionLayer:
         output_y = input_y - self.kernel_y + 1
 
         #col (flattened array)
-        col = np.zeros((output_x * output_y, input_channels * self.kernel_x * self.kernel_y)) #Using zeros to setup
+        col = np.zeros((input_batch_num * output_x * output_y, input_channels * self.kernel_x * self.kernel_y)) #Using zeros to setup
         row_index = 0
-        for i in range(output_x):
-            for j in range(output_y):
-                region = input_data[:, i:i+self.kernel_x, j:j+self.kernel_y] # the region from original input that should be flattened 
-                flattened_region = region.flatten()
-                col[row_index] = flattened_region
-                row_index += 1
+        for b in range(input_batch_num):
+            for i in range(output_x):
+                for j in range(output_y):
+                    region = input_data[b, :, i:i+self.kernel_x, j:j+self.kernel_y] # the region from original input that should be flattened 
+                    flattened_region = region.flatten()
+                    col[row_index] = flattened_region
+                    row_index += 1
 
         flattened_kernel = self.kernel_data.reshape(self.num_kernels, -1)
 
-        output = (flattened_kernel @ col.T) + self.bias_data.reshape(-1, 1)
-        output = output.reshape(self.num_kernels, output_x, output_y)
+        output = (col @ flattened_kernel.T)
+        output = output.reshape(input_batch_num, output_x, output_y, self.num_kernels)
+        output = output.transpose(0, 3, 1, 2)
+        output += self.bias_data.reshape(1, -1, 1, 1)
         self.col_cache = col
+        self.input_cache = input_data
         return output
     
     def _backward_col2im(self, output_gradient: np.ndarray) -> np.ndarray:
         """Packed col2im backward pass, ready to be used"""
-        K, output_x, output_y = output_gradient.shape
+        B, K, output_x, output_y = output_gradient.shape
         
-        gradient_reshaped = output_gradient.reshape(self.num_kernels, -1)
+        gradient_reshaped = output_gradient.transpose(0,2,3,1)
+        gradient_reshaped = gradient_reshaped.reshape(-1, self.num_kernels)
         self.kernel_gradient = (gradient_reshaped @ self.col_cache).reshape(self.kernel_data.shape)
         self.bias_gradient = np.sum(gradient_reshaped, axis=1)
 

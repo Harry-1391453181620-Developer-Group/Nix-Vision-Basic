@@ -1,0 +1,2 @@
+Things done:
+1.  Add minibatch to Conv layer col2im and im2col. im2col(forward) verified, col2im(backward) not verified.
