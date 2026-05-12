@@ -22,12 +22,13 @@ def load_dataset(dataset_path, target_size=(64, 64), max_classes=None):
 
             try:
                 image = Image.open(image_path).convert("L").resize(target_size)
-                image_array = np.array(image, dtype=np.float64) / 255.0
+                image_array = np.array(image, dtype=np.float32) / 255.0
+                image_array = image_array[np.newaxis, :, :]
 
                 data.append(image_array)
 
                 # one-hot
-                label = np.zeros(len(class_names))
+                label = np.zeros(len(class_names), dtype=np.float32)
                 label[class_index] = 1
                 labels.append(label)
 

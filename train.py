@@ -1,3 +1,5 @@
+from pyexpat import model
+
 import layers
 from model import MyAI
 import numpy as np
@@ -13,7 +15,10 @@ def parse_args():
 
     # Epoch number         
     parser.add_argument("--epochs",       type=int,                        default=40,                         help="Number of epochs")
-            
+    
+    # Batch size
+    parser.add_argument("--batch-size",   type=int,                        default=64,                         help="Batch size (default: 64)")
+
     # Learning rate                  
     parser.add_argument("--lr",           type=float,                      default=0.001,                      help="Learning rate")
     parser.add_argument("--lr-decay",     type=float,                      default=0.98,                       help="LR decay per epoch")
@@ -42,12 +47,21 @@ def split_data(data, labels, val_ratio=0.2):
     val_idx   = indices[split:]
     return data[train_idx], labels[train_idx], data[val_idx], labels[val_idx]
 
-def evaluate(model, data, labels):
+def evaluate(model, data, labels, batch_size=64):
     correct = 0
-    for i in range(len(data)):
-        pred = predict(model, data[i])
-        if np.argmax(pred) == np.argmax(labels[i]):
-            correct += 1
+    for i in range(0, len(data), batch_size):
+        end = min(i + batch_size, len(data))
+
+        batch_data = data[i:end]
+        batch_labels = labels[i:end]
+
+        prediction = model.forward(batch_data)
+
+        pred_classes = np.argmax(prediction, axis=1)
+        target_classes = np.argmax(batch_labels, axis=1)
+
+        correct += np.sum(pred_classes == target_classes)
+
     return correct / len(data)
 
 def save_model(model, path="model.npz"):
@@ -80,12 +94,24 @@ def load_model(model, path="model.npz"):
     model.fc1.bias    = d["fc1_bias"]
     model.fc2.weights = d["fc2_weights"]
     model.fc2.bias    = d["fc2_bias"]
+    model.fc1.weights_gradient = np.zeros_like(model.fc1.weights)
+    model.fc1.bias_gradient = np.zeros_like(model.fc1.bias)
+
+    model.fc1.weights_velocity = np.zeros_like(model.fc1.weights)
+    model.fc1.bias_velocity = np.zeros_like(model.fc1.bias)
+
+    model.fc2.weights_gradient = np.zeros_like(model.fc2.weights)
+    model.fc2.bias_gradient = np.zeros_like(model.fc2.bias)
+
+    model.fc2.weights_velocity = np.zeros_like(model.fc2.weights)
+    model.fc2.bias_velocity = np.zeros_like(model.fc2.bias)
     print(f"Model loaded from {path}")
     return model
 
 def train(model, 
           train_data, 
           train_labels, 
+          batch_size=64,
           epochs=10, 
           lr=0.001, 
           lr_decay=0.98,
@@ -105,22 +131,27 @@ def train(model,
         
         #Shuffle
         indices = np.random.permutation(len(train_data))
-        for idx in indices:
-            input_data = train_data[idx]
-            target = train_labels[idx].reshape(1, -1)
+
+        for start in range(0, len(train_data), batch_size):
+            end = start + batch_size
+            batch_indices = indices[start:end]
+
+            input_data = train_data[batch_indices]
+            target = train_labels[batch_indices]
 
             prediction = model.forward(input_data)
-            loss = loss_fn.forward(prediction, target)
-            total_loss += loss
+            loss = loss.fn.forward(prediction, target)
+            total_loss += loss * len(batch_indices)
 
-            grad = loss_fn.backward(prediction, target)
+            grad = loss.fn.backward(prediction, target)
+
             model.backward(grad)
 
             model.update(current_lr, l2_lambda=l2_lambda)
         
         train_loss = total_loss / len(train_data)
         model.dropout.eval()
-        train_acc = evaluate(model, train_data, train_labels)
+        train_acc = evaluate(model, train_data, train_labels, batch_size=batch_size)
         model.dropout.train()
         
         if val_data is not None:
@@ -128,12 +159,24 @@ def train(model,
             val_loss = 0
             correct = 0
 
-            for i in range(len(val_data)):
-                pred = model.forward(val_data[i])
-                val_loss += loss_fn.forward(pred, val_labels[i].reshape(1, -1))
+            for start in range(0, len(val_data), batch_size):
+                end = min(start + batch_size, len(val_data))
 
-                if np.argmax(pred) == np.argmax(val_labels[i]):
-                    correct += 1
+                batch_data = val_data[start:end]
+                batch_target = val_labels[start:end]
+
+                pred = model.forward(batch_data)
+
+                loss = loss_fn.forward(pred, batch_target)
+
+                val_loss += loss * len(batch_data)
+
+                pred_classes = np.argmax(pred, axis=1)
+                target_classes = np.argmax(batch_target, axis=1)
+
+                correct += np.sum(
+                    pred_classes == target_classes
+                )
 
             val_loss /= len(val_data)
             val_acc = correct / len(val_data)
@@ -169,7 +212,10 @@ if __name__ == "__main__":
         load_model(model, args.load_from)
 
     should_save = args.saving and not args.no_saving
-    train(model, train_data, train_labels,
+    train(model, 
+          train_data, 
+          train_labels,
+          batch_size=args.batch_size,
           epochs=args.epochs,
           lr=args.lr,
           lr_decay=args.lr_decay,
