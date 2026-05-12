@@ -1,0 +1,5 @@
+Things done:
+1.  Finish apply minibatch
+2.  Winograd is judged as not suitable and depreciated for the current structure. algorithm choice and code is reserved for future
+3.  Winograd part and FlattenLayer are commented.
+4.  Start training, expecting improvement.
