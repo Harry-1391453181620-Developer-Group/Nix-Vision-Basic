@@ -7,8 +7,10 @@ class ConvolutionLayer:
         self.kernel_y = kernel_y
         self.num_channels = num_channels
 
-        self.kernel_data = np.random.randn(num_kernels, num_channels, kernel_x, kernel_y) \
-                           * np.sqrt(2.0 / (num_channels * kernel_x * kernel_y)).astype(np.float32)
+        self.kernel_data = (
+            np.random.randn(num_kernels, num_channels, kernel_x, kernel_y).astype(np.float32)
+            * np.float32(np.sqrt(2.0 / (num_channels * kernel_x * kernel_y)))
+        )
         self.bias_data = np.zeros((num_kernels,), dtype=np.float32)
 
         self.kernel_gradient = np.zeros_like(self.kernel_data)
@@ -247,8 +249,10 @@ class FullyConnectedLayer:
         self.original_shape = None
 
     def _initialize_parameters(self, input_size: int):
-        self.weights = np.random.randn(input_size, self.output_size) \
-                       * np.sqrt(2.0 / input_size).astype(np.float32)
+        self.weights = (
+            np.random.randn(input_size, self.output_size).astype(np.float32)
+            * np.float32(np.sqrt(2.0 / input_size))
+        )
         self.bias = np.zeros((1, self.output_size), dtype=np.float32)
 
         self.weights_gradient = np.zeros_like(self.weights, dtype=np.float32)

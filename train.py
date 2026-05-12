@@ -140,12 +140,19 @@ def train(model,
             target = train_labels[batch_indices]
 
             prediction = model.forward(input_data)
-            loss = loss.fn.forward(prediction, target)
+            loss = loss_fn.forward(prediction, target)
             total_loss += loss * len(batch_indices)
 
-            grad = loss.fn.backward(prediction, target)
+            grad = loss_fn.backward(prediction, target)
 
             model.backward(grad)
+
+            # NOTE: Gradient clipping for future MAOIDL and IDSI addings.
+            for layer in [model.conv1, model.conv2, model.conv3, model.fc1, model.fc2]:
+                if hasattr(layer, "kernel_gradient"):
+                    np.clip(layer.kernel_gradient, -5, 5, out=layer.kernel_gradient)
+                if hasattr(layer, "weights_gradient"):
+                    np.clip(layer.weights_gradient, -5, 5, out=layer.weights_gradient)
 
             model.update(current_lr, l2_lambda=l2_lambda)
         
@@ -208,7 +215,7 @@ if __name__ == "__main__":
     model = MyAI(num_classes=len(class_names), dropout_prob=args.dropout_prob)
 
     if args.loading and not args.no_loading:
-        model.forward(data[0])
+        model.forward(data[0:1])
         load_model(model, args.load_from)
 
     should_save = args.saving and not args.no_saving
