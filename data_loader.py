@@ -24,7 +24,6 @@ def load_dataset(dataset_path, target_size=(64, 64), max_classes=None):
                 image = Image.open(image_path).convert("RGB").resize(target_size)
                 image_array = np.array(image, dtype=np.float32) / 255.0
                 image_array = np.transpose(image_array, (2, 0, 1))
-                image_array = image_array[np.newaxis, :, :]
 
                 data.append(image_array)
 

@@ -37,8 +37,6 @@ class ConvolutionLayer:
         """Packed im2col forward pass, ready to be used"""
         if input_data.ndim == 2:
             input_data = input_data[np.newaxis, np.newaxis, :, :]
-        elif input_data.ndim == 3:
-            input_data = input_data[np.newaxis, :, :, :]
 
         input_batch_num, input_channels, input_x, input_y = input_data.shape
 
