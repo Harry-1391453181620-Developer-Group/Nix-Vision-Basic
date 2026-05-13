@@ -1,7 +1,7 @@
 import numpy as np
 
 class ConvolutionLayer:
-    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int, num_channels: int=1, algorithm: str="im2col"):
+    def __init__(self, num_kernels: int, kernel_x: int, kernel_y: int, num_channels: int=3, algorithm: str="im2col"):
         self.num_kernels = num_kernels
         self.kernel_x = kernel_x
         self.kernel_y = kernel_y
@@ -428,6 +428,79 @@ class DropoutLayer:
         else:
             return gradient_output
         
+    def train(self):
+        self.training = True
+
+    def eval(self):
+        self.training = False
+
+class BatchNormLayer:
+    def __init__(self, num_features: int, epsilon: float=1e-5, momentum: float=0.9):
+        self.num_features = num_features
+        self.epsilon = epsilon
+
+        self.momentum = momentum
+
+        self.gamma = np.ones((1, num_features, 1, 1), dtype=np.float32)
+        self.beta = np.zeros((1, num_features, 1, 1), dtype=np.float32)
+        self.gamma_gradient = np.zeros_like(self.gamma)
+        self.beta_gradient = np.zeros_like(self.beta)
+        self.gamma_velocity = np.zeros_like(self.gamma)
+        self.beta_velocity = np.zeros_like(self.beta)
+        self.running_mean = np.zeros((1, num_features, 1, 1), dtype=np.float32)
+        self.running_var = np.ones((1, num_features, 1, 1), dtype=np.float32)
+
+        self.input_cache = None
+        self.normalized_cache = None
+        self.batch_mean_cache = None
+        self.batch_var_cache = None
+
+        self.training = True
+
+    def forward(self, input_data: np.ndarray) -> np.ndarray:
+        if self.training:
+            batch_mean = np.mean(input_data, axis=(0, 2, 3), keepdims=True)
+            batch_var = np.var(input_data, axis=(0, 2, 3), keepdims=True)
+            normalized = (input_data - batch_mean) / np.sqrt((batch_var + self.epsilon))
+            self.running_mean = (self.momentum * self.running_mean + (1.0 - self.momentum) * batch_mean)
+            self.running_var = (self.momentum * self.running_var + (1.0 - self.momentum) * batch_var)
+            self.input_cache = input_data
+            self.normalized_cache = normalized
+            self.batch_mean_cache = batch_mean
+            self.batch_var_cache = batch_var
+        else:
+            normalized = (input_data - self.running_mean) / np.sqrt(self.running_var + self.epsilon)
+        
+        output = self.gamma * normalized + self.beta
+        return output
+    
+    def backward(self, output_gradient: np.ndarray) -> np.ndarray:
+        X = self.input_cache
+        X_hat = self.normalized_cache
+        mean = self.batch_mean_cache
+        var = self.batch_var_cache
+
+        B, C, H, W = X.shape
+
+        N = B * H * W
+
+        self.gamma_gradient = np.sum(output_gradient * X_hat, axis = (0, 2, 3), keepdims=True) / N
+        self.beta_gradient = np.sum(output_gradient, axis=(0, 2, 3), keepdims=True) / N
+        dX_hat = output_gradient * self.gamma
+        inv_std = 1.0 / np.sqrt(var + self.epsilon)
+        dVar = np.sum(dX_hat * (X - mean) * (-0.5) * (inv_std ** 3), axis=(0, 2, 3), keepdims=True)
+        dMean = np.sum(dX_hat * (-inv_std), axis=(0, 2, 3), keepdims=True)
+        dMean += (dVar * np.sum(-2.0 * (X - mean), axis=(0, 2, 3), keepdims=True))
+        input_gradient = (dX_hat * inv_std + dVar * 2.0 * (X - mean) / N + dMean / N)
+        return input_gradient
+    
+    def momentum_update(self, learning_rate: float, momentum: float=0.9, l2_lambda: float=0.0001):
+        self.gamma_gradient += l2_lambda * self.gamma
+        self.gamma_velocity = (momentum * self.gamma_velocity - learning_rate * self.gamma_gradient)
+        self.beta_velocity = (momentum * self.beta_velocity - learning_rate * self.beta_gradient)
+        self.gamma += self.gamma_velocity
+        self.beta += self.beta_velocity
+    
     def train(self):
         self.training = True
 

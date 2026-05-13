@@ -126,7 +126,7 @@ def train(model,
     best_val_acc = 0.0
 
     for epoch in range(epochs):
-        model.dropout.train()
+        model.train()
         total_loss = 0
         
         #Shuffle
@@ -157,12 +157,12 @@ def train(model,
             model.update(current_lr, l2_lambda=l2_lambda)
         
         train_loss = total_loss / len(train_data)
-        model.dropout.eval()
+        model.eval()
         train_acc = evaluate(model, train_data, train_labels, batch_size=batch_size)
-        model.dropout.train()
+        model.train()
         
         if val_data is not None:
-            model.dropout.eval()
+            model.eval()
             val_loss = 0
             correct = 0
 
