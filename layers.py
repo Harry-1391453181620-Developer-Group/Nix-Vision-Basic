@@ -482,13 +482,13 @@ class BatchNormLayer:
 
         N = B * H * W
 
-        self.gamma_gradient = np.sum(output_gradient * X_hat, axis = (0, 2, 3), keepdims=True) / N
-        self.beta_gradient = np.sum(output_gradient, axis=(0, 2, 3), keepdims=True) / N
+        self.gamma_gradient = np.sum(output_gradient * X_hat, axis = (0, 2, 3), keepdims=True)
+        self.beta_gradient = np.sum(output_gradient, axis=(0, 2, 3), keepdims=True)
         dX_hat = output_gradient * self.gamma
         inv_std = 1.0 / np.sqrt(var + self.epsilon)
         dVar = np.sum(dX_hat * (X - mean) * (-0.5) * (inv_std ** 3), axis=(0, 2, 3), keepdims=True)
         dMean = np.sum(dX_hat * (-inv_std), axis=(0, 2, 3), keepdims=True)
-        dMean += (dVar * np.sum(-2.0 * (X - mean), axis=(0, 2, 3), keepdims=True))
+        dMean += (dVar * np.sum(-2.0 * (X - mean), axis=(0, 2, 3), keepdims=True)) / N
         input_gradient = (dX_hat * inv_std + dVar * 2.0 * (X - mean) / N + dMean / N)
         return input_gradient
     

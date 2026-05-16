@@ -78,7 +78,23 @@ def save_model(model, path="model.npz"):
         fc1_weights=model.fc1.weights,
         fc1_bias=model.fc1.bias,
         fc2_weights=model.fc2.weights,   
-        fc2_bias=model.fc2.bias
+        fc2_bias=model.fc2.bias,
+
+        #BN
+        bn1_gamma=model.bn1.gamma,
+        bn1_beta=model.bn1.beta,
+        bn1_running_mean=model.bn1.running_mean,
+        bn1_running_var=model.bn1.running_var,
+
+        bn2_gamma=model.bn2.gamma,
+        bn2_beta=model.bn2.beta,
+        bn2_running_mean=model.bn2.running_mean,
+        bn2_running_var=model.bn2.running_var,
+
+        bn3_gamma=model.bn3.gamma,
+        bn3_beta=model.bn3.beta,
+        bn3_running_mean=model.bn3.running_mean,
+        bn3_running_var=model.bn3.running_var,
     )
     print(f"Model saved to {path}")
 
@@ -105,6 +121,25 @@ def load_model(model, path="model.npz"):
 
     model.fc2.weights_velocity = np.zeros_like(model.fc2.weights)
     model.fc2.bias_velocity = np.zeros_like(model.fc2.bias)
+
+    # BN1
+    model.bn1.gamma = d["bn1_gamma"]
+    model.bn1.beta = d["bn1_beta"]
+    model.bn1.running_mean = d["bn1_running_mean"]
+    model.bn1.running_var = d["bn1_running_var"]
+
+    # BN2
+    model.bn2.gamma = d["bn2_gamma"]
+    model.bn2.beta = d["bn2_beta"]
+    model.bn2.running_mean = d["bn2_running_mean"]
+    model.bn2.running_var = d["bn2_running_var"]
+
+    # BN3
+    model.bn3.gamma = d["bn3_gamma"]
+    model.bn3.beta = d["bn3_beta"]
+    model.bn3.running_mean = d["bn3_running_mean"]
+    model.bn3.running_var = d["bn3_running_var"]
+    
     print(f"Model loaded from {path}")
     return model
 

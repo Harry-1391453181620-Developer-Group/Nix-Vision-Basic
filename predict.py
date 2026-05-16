@@ -15,6 +15,23 @@ def load_model(model, path="model.npz"):
         model.fc1.bias    = d["fc1_bias"]
         model.fc2.weights = d["fc2_weights"]
         model.fc2.bias    = d["fc2_bias"]
+        # BN1
+        model.bn1.gamma = d["bn1_gamma"]
+        model.bn1.beta = d["bn1_beta"]
+        model.bn1.running_mean = d["bn1_running_mean"]
+        model.bn1.running_var = d["bn1_running_var"]
+
+        # BN2
+        model.bn2.gamma = d["bn2_gamma"]
+        model.bn2.beta = d["bn2_beta"]
+        model.bn2.running_mean = d["bn2_running_mean"]
+        model.bn2.running_var = d["bn2_running_var"]
+
+        # BN3
+        model.bn3.gamma = d["bn3_gamma"]
+        model.bn3.beta = d["bn3_beta"]
+        model.bn3.running_mean = d["bn3_running_mean"]
+        model.bn3.running_var = d["bn3_running_var"]
         print(f"Model loaded from {path}")
 
 def load_image(path):
@@ -25,13 +42,13 @@ def load_image(path):
     return img_array
 
 def enable_winograd(model):
-    model.conv1.algorithm = "winograd"
-    model.conv2.algorithm = "winograd"
-    model.conv3.algorithm = "winograd"
+    model.conv1.algorithm = "im2col"
+    model.conv2.algorithm = "im2col"
+    model.conv3.algorithm = "im2col"
 
-    model.conv1.wino_ready = False
-    model.conv2.wino_ready = False
-    model.conv3.wino_ready = False
+    # model.conv1.wino_ready = False
+    # model.conv2.wino_ready = False
+    # model.conv3.wino_ready = False
 
 def predict(model, image):
     model.dropout.eval()
