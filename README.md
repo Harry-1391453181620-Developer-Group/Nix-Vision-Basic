@@ -85,7 +85,7 @@ This project is part of a larger system called **Nix**, a future Mixture-of-Expe
 - **Nix-Vision-Basic** (this repo)  
   → A from-scratch CNN built with NumPy for learning and experimentation  
 
-- **Nix-Vision-Pro** (coming soon)  
+- **Nix-Vision-Pro** (https://github.com/Harry-1391453181620-Developer-Group/Nix-Vision-Pro)  
   → A more advanced vision model with improved architecture and performance  
 
 In the future, both will serve as **Vision Experts** inside the Nix MoE model (Not started yet) or integrate fully using more complex neurons in Nix instead of MoE.
