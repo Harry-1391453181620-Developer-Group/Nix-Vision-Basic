@@ -433,7 +433,7 @@ class DropoutLayer:
         self.training = False
 
 class BatchNormLayer:
-    def __init__(self, num_features: int, epsilon: float=1e-5, momentum: float=0.9):
+    def __init__(self, num_features: int, epsilon: float=1e-5, momentum: float=0.95):
         self.num_features = num_features
         self.epsilon = epsilon
 
@@ -455,22 +455,53 @@ class BatchNormLayer:
 
         self.training = True
 
-    def forward(self, input_data: np.ndarray) -> np.ndarray:
+        self.std_inv_cache = None
+
+    def forward(self, input_data):
+
         if self.training:
-            batch_mean = np.mean(input_data, axis=(0, 2, 3), keepdims=True)
-            batch_var = np.var(input_data, axis=(0, 2, 3), keepdims=True)
-            normalized = (input_data - batch_mean) / np.sqrt((batch_var + self.epsilon))
-            self.running_mean = (self.momentum * self.running_mean + (1.0 - self.momentum) * batch_mean)
-            self.running_var = (self.momentum * self.running_var + (1.0 - self.momentum) * batch_var)
+            batch_mean = np.mean(
+                input_data,
+                axis=(0,2,3),
+                keepdims=True
+            )
+    
+            batch_var = np.var(
+                input_data,
+                axis=(0,2,3),
+                keepdims=True,
+                ddof=1
+            )
+    
+            self.std_inv_cache = (
+                1.0 / np.sqrt(batch_var + self.epsilon)
+            )
+    
+            normalized = (
+                input_data - batch_mean
+            ) * self.std_inv_cache
+    
+            self.running_mean = (
+                self.momentum * self.running_mean
+                + (1.0 - self.momentum) * batch_mean
+            )
+    
+            self.running_var = (
+                self.momentum * self.running_var
+                + (1.0 - self.momentum) * batch_var
+            )
+    
             self.input_cache = input_data
             self.normalized_cache = normalized
             self.batch_mean_cache = batch_mean
             self.batch_var_cache = batch_var
+    
         else:
-            normalized = (input_data - self.running_mean) / np.sqrt(self.running_var + self.epsilon)
-        
-        output = self.gamma * normalized + self.beta
-        return output
+            normalized = (
+                input_data - self.running_mean
+            ) / np.sqrt(self.running_var + self.epsilon)
+    
+        return self.gamma * normalized + self.beta
     
     def backward(self, output_gradient: np.ndarray) -> np.ndarray:
         X = self.input_cache
@@ -485,7 +516,7 @@ class BatchNormLayer:
         self.gamma_gradient = np.sum(output_gradient * X_hat, axis = (0, 2, 3), keepdims=True)
         self.beta_gradient = np.sum(output_gradient, axis=(0, 2, 3), keepdims=True)
         dX_hat = output_gradient * self.gamma
-        inv_std = 1.0 / np.sqrt(var + self.epsilon)
+        inv_std = self.std_inv_cache
         dVar = np.sum(dX_hat * (X - mean) * (-0.5) * (inv_std ** 3), axis=(0, 2, 3), keepdims=True)
         dMean = np.sum(dX_hat * (-inv_std), axis=(0, 2, 3), keepdims=True)
         dMean += (dVar * np.sum(-2.0 * (X - mean), axis=(0, 2, 3), keepdims=True)) / N
