@@ -15,6 +15,6 @@
 
     -1. Write history files after the end of a day
     -2. Commit every change
-    -3. Review before commit'
+    -3. Review before commit
     -4. As pure human wrote as possible, reject AI
-    -5. 
+    

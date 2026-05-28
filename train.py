@@ -2,6 +2,7 @@ from pyexpat import model
 
 import layers
 from model import MyAI
+from optimizer import AdamW
 import numpy as np
 import data_loader as dl
 import argparse
@@ -157,7 +158,9 @@ def train(model,
           val_labels=None):
     
     loss_fn = layers.CrossEntropyLossLayer()
-    current_lr = lr
+
+    optimizer = AdamW(model.parameters(), learning_rate=lr, weight_decay=l2_lambda)
+
     best_val_acc = 0.0
 
     for epoch in range(epochs):
@@ -182,14 +185,7 @@ def train(model,
 
             model.backward(grad)
 
-            # NOTE: Gradient clipping for future MAOIDL and IDSI addings.
-            for layer in [model.conv1, model.conv2, model.conv3, model.fc1, model.fc2]:
-                if hasattr(layer, "kernel_gradient"):
-                    np.clip(layer.kernel_gradient, -5, 5, out=layer.kernel_gradient)
-                if hasattr(layer, "weights_gradient"):
-                    np.clip(layer.weights_gradient, -5, 5, out=layer.weights_gradient)
-
-            model.update(current_lr, l2_lambda=l2_lambda)
+            optimizer.step()
         
         train_loss = total_loss / len(train_data)
         model.eval()
@@ -224,7 +220,7 @@ def train(model,
             val_acc = correct / len(val_data)
 
             gap = train_acc - val_acc
-            print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Train Accuracy: {train_acc:.4%}, Val Loss: {val_loss:.6f}, Val Accuracy: {val_acc:.4%}, Gap: {gap:.6f}, LR: {current_lr:.6f}")
+            print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Train Accuracy: {train_acc:.4%}, Val Loss: {val_loss:.6f}, Val Accuracy: {val_acc:.4%}, Gap: {gap:.6f}, LR: {optimizer.lr:.6f}")
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
@@ -232,9 +228,9 @@ def train(model,
                     save_model(model, save_to)
                     print(f"  → New best saved! Val: {val_acc:.2%}")
         else:
-            print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Accuracy: {train_acc:.4%}, LR: {current_lr:.6f}")
+            print(f"Epoch {epoch}, Train Loss: {train_loss:.6f}, Accuracy: {train_acc:.4%}, LR: {optimizer.lr:.6f}")
         
-        current_lr *= lr_decay
+        optimizer.lr *= lr_decay
 
 if __name__ == "__main__":
     args = parse_args()

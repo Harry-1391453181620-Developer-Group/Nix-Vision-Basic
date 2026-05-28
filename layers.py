@@ -17,8 +17,8 @@ class ConvolutionLayer:
         self.bias_gradient = np.zeros_like(self.bias_data)
 
         # For Momentum
-        self.kernel_velocity = np.zeros_like(self.kernel_data)
-        self.bias_velocity = np.zeros_like(self.bias_data)
+        # self.kernel_velocity = np.zeros_like(self.kernel_data)
+        # self.bias_velocity = np.zeros_like(self.bias_data)
 
         self.input_cache = None
         self.col_cache = None # col cache for backward
@@ -195,19 +195,21 @@ class ConvolutionLayer:
         """Only col2im"""
         return self._backward_col2im(output_gradient)
 
-    def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
-        #if hasattr(self, 'U'):
-        #    del self.U
-        
-        self.kernel_gradient += l2_lambda * self.kernel_data
+    # Replaced by AdamW, but kept for memorial.
 
-        self.kernel_velocity = momentum * self.kernel_velocity - learning_rate * self.kernel_gradient
-        self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
-
-        self.kernel_data += self.kernel_velocity
-        self.bias_data += self.bias_velocity
-
-        #self.wino_ready = False
+    # def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+    #     #if hasattr(self, 'U'):
+    #     #    del self.U
+    #     
+    #     self.kernel_gradient += l2_lambda * self.kernel_data
+    # 
+    #     self.kernel_velocity = momentum * self.kernel_velocity - learning_rate * self.kernel_gradient
+    #     self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
+    # 
+    #     self.kernel_data += self.kernel_velocity
+    #     self.bias_data += self.bias_velocity
+    # 
+    #     #self.wino_ready = False
 
     def train(self):
         self.training = True
@@ -240,8 +242,8 @@ class FullyConnectedLayer:
             self.bias = None
             self.weights_gradient = None
             self.bias_gradient = None
-            self.weights_velocity = None
-            self.bias_velocity = None
+            # self.weights_velocity = None
+            # self.bias_velocity = None
 
         self.input_cache = None
         self.original_shape = None
@@ -296,14 +298,16 @@ class FullyConnectedLayer:
 
         return input_gradient
     
-    def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
-        self.weights_gradient += l2_lambda * self.weights
+    # Replaced by AdamW, but kept for memorial.
 
-        self.weights_velocity = momentum * self.weights_velocity - learning_rate * self.weights_gradient
-        self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
-
-        self.weights += self.weights_velocity
-        self.bias += self.bias_velocity
+    # def momentum_update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+    #     self.weights_gradient += l2_lambda * self.weights
+    # 
+    #     self.weights_velocity = momentum * self.weights_velocity - learning_rate * self.weights_gradient
+    #     self.bias_velocity = momentum * self.bias_velocity - learning_rate * self.bias_gradient
+    # 
+    #     self.weights += self.weights_velocity
+    #     self.bias += self.bias_velocity
 
 class MaxPoolingLayer:
     def __init__(self, pool_size: int):
@@ -443,8 +447,8 @@ class BatchNormLayer:
         self.beta = np.zeros((1, num_features, 1, 1), dtype=np.float32)
         self.gamma_gradient = np.zeros_like(self.gamma)
         self.beta_gradient = np.zeros_like(self.beta)
-        self.gamma_velocity = np.zeros_like(self.gamma)
-        self.beta_velocity = np.zeros_like(self.beta)
+        # self.gamma_velocity = np.zeros_like(self.gamma)
+        # self.beta_velocity = np.zeros_like(self.beta)
         self.running_mean = np.zeros((1, num_features, 1, 1), dtype=np.float32)
         self.running_var = np.ones((1, num_features, 1, 1), dtype=np.float32)
 
@@ -470,7 +474,6 @@ class BatchNormLayer:
                 input_data,
                 axis=(0,2,3),
                 keepdims=True,
-                ddof=1
             )
     
             self.std_inv_cache = (
@@ -523,12 +526,14 @@ class BatchNormLayer:
         input_gradient = (dX_hat * inv_std + dVar * 2.0 * (X - mean) / N + dMean / N)
         return input_gradient
     
-    def momentum_update(self, learning_rate: float, momentum: float=0.9, l2_lambda: float=0.0001):
-        self.gamma_gradient += l2_lambda * self.gamma
-        self.gamma_velocity = (momentum * self.gamma_velocity - learning_rate * self.gamma_gradient)
-        self.beta_velocity = (momentum * self.beta_velocity - learning_rate * self.beta_gradient)
-        self.gamma += self.gamma_velocity
-        self.beta += self.beta_velocity
+    # Replaced by AdamW, but kept for memorial.
+    
+    # def momentum_update(self, learning_rate: float, momentum: float=0.9, l2_lambda: float=0.0001):
+    #     self.gamma_gradient += l2_lambda * self.gamma
+    #     self.gamma_velocity = (momentum * self.gamma_velocity - learning_rate * self.gamma_gradient)
+    #     self.beta_velocity = (momentum * self.beta_velocity - learning_rate * self.beta_gradient)
+    #     self.gamma += self.gamma_velocity
+    #     self.beta += self.beta_velocity
     
     def train(self):
         self.training = True

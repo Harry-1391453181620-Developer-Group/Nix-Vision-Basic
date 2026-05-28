@@ -1,7 +1,6 @@
 import layers
 import numpy as np
 
-
 class MyAI:
     def __init__(self, num_classes: int, dropout_prob: float = 0.3):
         # CNN Structure
@@ -83,15 +82,17 @@ class MyAI:
         grad = self.bn1.backward(grad)
         grad = self.conv1.backward(grad)
 
-    def update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
-        self.conv1.momentum_update(learning_rate, momentum, l2_lambda)
-        self.bn1.momentum_update(learning_rate, momentum, l2_lambda)
-        self.conv2.momentum_update(learning_rate, momentum, l2_lambda)
-        self.bn2.momentum_update(learning_rate, momentum, l2_lambda)
-        self.conv3.momentum_update(learning_rate, momentum, l2_lambda)
-        self.bn3.momentum_update(learning_rate, momentum, l2_lambda)
-        self.fc1.momentum_update(learning_rate, momentum, l2_lambda)
-        self.fc2.momentum_update(learning_rate, momentum, l2_lambda)
+    # Replaced by AdamW, but kept for memorial
+
+    # def update(self, learning_rate: float, momentum: float = 0.9, l2_lambda: float = 0.0001):
+    #     self.conv1.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.bn1.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.conv2.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.bn2.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.conv3.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.bn3.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.fc1.momentum_update(learning_rate, momentum, l2_lambda)
+    #     self.fc2.momentum_update(learning_rate, momentum, l2_lambda)
 
     def train(self):
         self.dropout.train()
@@ -106,3 +107,31 @@ class MyAI:
         self.bn1.eval()
         self.bn2.eval()
         self.bn3.eval()
+
+    def parameters(self):
+        return [
+
+            ("conv1_kernel", self.conv1.kernel_data, self.conv1.kernel_gradient),
+            ("conv1_bias", self.conv1.bias_data, self.conv1.bias_gradient),
+
+            ("conv2_kernel", self.conv2.kernel_data, self.conv2.kernel_gradient),
+            ("conv2_bias", self.conv2.bias_data, self.conv2.bias_gradient),
+
+            ("conv3_kernel", self.conv3.kernel_data, self.conv3.kernel_gradient),
+            ("conv3_bias", self.conv3.bias_data, self.conv3.bias_gradient),
+
+            ("fc1_weights", self.fc1.weights, self.fc1.weights_gradient),
+            ("fc1_bias", self.fc1.bias, self.fc1.bias_gradient),
+
+            ("fc2_weights", self.fc2.weights, self.fc2.weights_gradient),
+            ("fc2_bias", self.fc2.bias, self.fc2.bias_gradient),
+
+            ("bn1_gamma", self.bn1.gamma, self.bn1.gamma_gradient),
+            ("bn1_beta", self.bn1.beta, self.bn1.beta_gradient),
+
+            ("bn2_gamma", self.bn2.gamma, self.bn2.gamma_gradient),
+            ("bn2_beta", self.bn2.beta, self.bn2.beta_gradient),
+
+            ("bn3_gamma", self.bn3.gamma, self.bn3.gamma_gradient),
+            ("bn3_beta", self.bn3.beta, self.bn3.beta_gradient),
+        ]
