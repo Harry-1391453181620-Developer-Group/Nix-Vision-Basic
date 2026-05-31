@@ -1,5 +1,3 @@
-from pyexpat import model
-
 import layers
 from model import MyAI
 from optimizer import AdamW
@@ -114,14 +112,14 @@ def load_model(model, path="model.npz"):
     model.fc1.weights_gradient = np.zeros_like(model.fc1.weights)
     model.fc1.bias_gradient = np.zeros_like(model.fc1.bias)
 
-    model.fc1.weights_velocity = np.zeros_like(model.fc1.weights)
-    model.fc1.bias_velocity = np.zeros_like(model.fc1.bias)
+    # model.fc1.weights_velocity = np.zeros_like(model.fc1.weights)
+    # model.fc1.bias_velocity = np.zeros_like(model.fc1.bias)
 
     model.fc2.weights_gradient = np.zeros_like(model.fc2.weights)
     model.fc2.bias_gradient = np.zeros_like(model.fc2.bias)
 
-    model.fc2.weights_velocity = np.zeros_like(model.fc2.weights)
-    model.fc2.bias_velocity = np.zeros_like(model.fc2.bias)
+    # model.fc2.weights_velocity = np.zeros_like(model.fc2.weights)
+    # model.fc2.bias_velocity = np.zeros_like(model.fc2.bias)
 
     # BN1
     model.bn1.gamma = d["bn1_gamma"]
@@ -159,6 +157,8 @@ def train(model,
     
     loss_fn = layers.CrossEntropyLossLayer()
 
+    # Complete lazy init before optimizer.
+    model.forward(train_data[:1])
     optimizer = AdamW(model.parameters(), learning_rate=lr, weight_decay=l2_lambda)
 
     best_val_acc = 0.0

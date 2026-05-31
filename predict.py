@@ -35,10 +35,11 @@ def load_model(model, path="model.npz"):
         print(f"Model loaded from {path}")
 
 def load_image(path):
-    img = Image.open(path).convert("L")  # Convert to grayscale
+    img = Image.open(path).convert("RGB")  # Convert to RGBgrayscale
     img = img.resize((64, 64))  # Resize to 64x64
     img_array = np.array(img) / 255.0  # Normalize to [0, 1]
-    img_array = img_array[np.newaxis, :, :]  # Add batch and channel dimensions
+    img_array = img_array.transpose(2,0,1)
+    img_array = img_array[np.newaxis]  # Add batch and channel dimensions
     return img_array
 
 def enable_winograd(model):
@@ -51,7 +52,7 @@ def enable_winograd(model):
     # model.conv3.wino_ready = False
 
 def predict(model, image):
-    model.dropout.eval()
+    model.eval()
     output = model.forward(image)
     return np.argmax(output)
 
