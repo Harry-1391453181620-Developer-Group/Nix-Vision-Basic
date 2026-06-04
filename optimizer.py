@@ -1,8 +1,8 @@
 import numpy as np
 
 class AdamW():
-    def __init__(self, parameters, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.0001):
-        self.parameters = parameters
+    def __init__(self, model, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.0001):
+        self.model = model
         
         self.lr = learning_rate
         self.beta1 = beta1
@@ -35,5 +35,5 @@ class AdamW():
             )
     def step(self):
         self.t += 1
-        for name, param, grad in self.parameters:
+        for name, param, grad in self.model.parameters():
             self.update(param, grad, name)

@@ -159,7 +159,7 @@ def train(model,
 
     # Complete lazy init before optimizer.
     model.forward(train_data[:1])
-    optimizer = AdamW(model.parameters(), learning_rate=lr, weight_decay=l2_lambda)
+    optimizer = AdamW(model, learning_rate=lr, weight_decay=l2_lambda)
 
     best_val_acc = 0.0
 
