@@ -63,7 +63,8 @@ Epoch 19, Train Loss: 1.079940, Train Accuracy: 67.2155%, Val Loss: 1.227119, Va
 Model saved to model.npz
   → New best saved! Val: 59.77%
 Epoch 20, Train Loss: 1.062940, Train Accuracy: 62.3845%, Val Loss: 1.336626, Val Accuracy: 56.6561%, Gap: 0.057284, LR: 0.000283
-Epoch 21, Train Loss: 1.036773, Train Accuracy: 68.0748%, Val Loss: 1.208504, Val Accuracy: 61.6806%, Gap: 0.063942, LR: 0.000282
+Epoch 21, 
+ Loss: 1.036773, Train Accuracy: 68.0748%, Val Loss: 1.208504, Val Accuracy: 61.6806%, Gap: 0.063942, LR: 0.000282
 Model saved to model.npz
   → New best saved! Val: 61.68%
 Epoch 22, Train Loss: 1.030264, Train Accuracy: 66.1756%, Val Loss: 1.233964, Val Accuracy: 59.1684%, Gap: 0.070073, LR: 0.000281

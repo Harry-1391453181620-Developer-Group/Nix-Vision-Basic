@@ -22,10 +22,10 @@ class MyAI:
         self.gap = layers.GlobalAvgPoolingLayer()
 
         # Fully Connected（Lazy Init）
-        self.fc1 = layers.FullyConnectedLayer(None, 128)
+        self.fc1 = layers.FullyConnectedLayer(None, 256)
         self.fc_relu = layers.ReLULayer()
         self.dropout = layers.DropoutLayer(dropout_prob)
-        self.fc2 = layers.FullyConnectedLayer(128, num_classes)
+        self.fc2 = layers.FullyConnectedLayer(256, num_classes)
 
         self.softmax = layers.SoftmaxLayer()
 

@@ -1,0 +1,4 @@
+Things done:
+1.  Reached 69.88%!! THE TRAINING OUTPUT IS LOST!!!
+note: This is a LONG traning because it breaks many times.
+WE WILL SHIFT TO PyTorch VERY SOON
