@@ -62,8 +62,9 @@ if __name__ == "__main__":
     load_model(model, "model.npz")
     enable_winograd(model)
 
-    img = load_image("D:\\Programing_materials\\Python\\python_Projects\\Image_Identify_CNN\\test_image\\image13.jpg")
+    img = load_image("D:\\Programing_materials\\Python\\python_Projects\\Image_Identify_CNN\\test_image\\image32.jpg")
     pred_class = predict(model, img)
+    dict_of_classes = {0: "airplane", 1: "bird", 2: "cat", 3: "deer", 4: "dog", 5: "frog", 6: "horse", 7: "man", 8: "maple_tree", 9: "motorcycle", 10: "mountain", 11: "mouse", 12: "mushroom"}
 
-    print(f"Predicted class: {pred_class}")
+    print(f"Predicted class: {dict_of_classes[int(pred_class)]}")
             
