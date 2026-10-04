@@ -53,3 +53,8 @@ coverage.xml
 # Environment variables
 .env
 .venv
+
+# Snycthing
+.stignore
+.stfolder
+.stfolder/
